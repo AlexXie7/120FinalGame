@@ -49,9 +49,10 @@ class Play extends Phaser.Scene {
     }
 
     // called by current minigame when it is finished before the time limit
-    minigameFinished(result) {
+    minigameFinished(scene, result) {
         clearTimeout(this.minigameTimeout);
         console.log('finished - closing minigame - minigame result:', result);
+        this.scene.stop(scene);
     }
 
     update() {

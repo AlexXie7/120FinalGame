@@ -30,7 +30,7 @@ class Minigame extends Phaser.Scene {
     finish(result) {
         this.isFinished = true;
         this.isPassed = result;
-        this.playScene.minigameFinished(result);
+        this.playScene.minigameFinished(this, result);
     }
 }
 
