@@ -15,8 +15,29 @@ class Play extends Phaser.Scene {
         // Map Waypoints
         let school = {
             x: game.scale.width  * 3 / 4,
-            y: game.scale.height * 1 / 4
-        }
+            y: game.scale.height * 1 / 4,
+            minigames: []
+        };
+
+        let home = {
+            x: gameCenterX,
+            y: gameCenterY,
+            minigames: []
+        };
+
+        let restaurant = {
+            x: gameCenterX / 2,
+            y: gameCenterY * 1.5,
+            minigames: []
+        };
+
+        //maybe we should rename town to plaza?
+        let town = {
+            x: gameCenterX / 2,
+            y: gameCenterY / 2,
+            minigames: []
+        };
+
 
         this.schoolPath = this.add.path(this.player.x, this.player.y);
         this.schoolPath.lineTo(school.x, school.y);
@@ -28,8 +49,8 @@ class Play extends Phaser.Scene {
             duration: 3000,
             ease: 'Power0',
             hold: 0,
-            repeat: -1,
-            yoyo: true,
+            //repeat: -1,
+            //yoyo: true,
             rotateToPath: false
         });
     }
