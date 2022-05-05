@@ -12,6 +12,8 @@ class Play extends Phaser.Scene {
         this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
         this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player');
 
+        this.isWalking = false;
+
         // Map Waypoints
         this.school = {
             x: game.scale.width  * 3 / 4,
@@ -39,6 +41,7 @@ class Play extends Phaser.Scene {
         };
 
         this.walkToSchool();
+
     }
 
     update() {
@@ -48,6 +51,8 @@ class Play extends Phaser.Scene {
     walkToSchool() {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.school.x, this.school.y);
+
+        this.isWalking = true;
 
         this.player.path = walkPath;
         this.player.startFollow({
@@ -61,6 +66,10 @@ class Play extends Phaser.Scene {
             //yoyo: true,
             //rotateToPath: false
         });
+
+        setTimeout(() => {
+            this.isWalking = false;
+        }, 3000);
 
 
         // temp minigame testing
@@ -81,6 +90,8 @@ class Play extends Phaser.Scene {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.home.x, this.home.y);
 
+        this.isWalking = true;
+
         this.player.path = walkPath;
         this.player.startFollow({
             from: 0,
@@ -96,6 +107,8 @@ class Play extends Phaser.Scene {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.restaurant.x, this.restaurant.y);
 
+        this.isWalking = true;
+
         this.player.path = walkPath;
         this.player.startFollow({
             from: 0,
@@ -110,6 +123,8 @@ class Play extends Phaser.Scene {
     walkToTown() {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.town.x, this.town.y);
+
+        this.isWalking = true;
 
         this.player.path = walkPath;
         this.player.startFollow({
