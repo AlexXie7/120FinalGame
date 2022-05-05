@@ -13,35 +13,43 @@ class Play extends Phaser.Scene {
         this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player');
 
         // Map Waypoints
-        let school = {
+        this.school = {
             x: game.scale.width  * 3 / 4,
             y: game.scale.height * 1 / 4,
             minigames: []
         };
 
-        let home = {
+        this.home = {
             x: gameCenterX,
             y: gameCenterY,
             minigames: []
         };
 
-        let restaurant = {
+        this.restaurant = {
             x: gameCenterX / 2,
             y: gameCenterY * 1.5,
             minigames: []
         };
 
         //maybe we should rename town to plaza?
-        let town = {
+        this.town = {
             x: gameCenterX / 2,
             y: gameCenterY / 2,
             minigames: []
         };
 
+        this.walkToSchool();
+    }
 
-        this.schoolPath = this.add.path(this.player.x, this.player.y);
-        this.schoolPath.lineTo(school.x, school.y);
-        this.player.path = this.schoolPath;
+    update() {
+
+    }
+
+    walkToSchool() {
+        let walkPath = this.add.path(this.player.x, this.player.y);
+        walkPath.lineTo(this.school.x, this.school.y);
+
+        this.player.path = walkPath;
         this.player.startFollow({
             from: 0,
             to: 1,
@@ -51,12 +59,53 @@ class Play extends Phaser.Scene {
             hold: 0,
             //repeat: -1,
             //yoyo: true,
-            rotateToPath: false
+            //rotateToPath: false
         });
     }
 
-    update() {
+    walkToHome() {
+        let walkPath = this.add.path(this.player.x, this.player.y);
+        walkPath.lineTo(this.home.x, this.home.y);
 
+        this.player.path = walkPath;
+        this.player.startFollow({
+            from: 0,
+            to: 1,
+            delay: 0,
+            duration: 3000,
+            ease: 'Power0',
+            hold: 0,
+        });
+    }
+
+    walkToRestaurant() {
+        let walkPath = this.add.path(this.player.x, this.player.y);
+        walkPath.lineTo(this.restaurant.x, this.restaurant.y);
+
+        this.player.path = walkPath;
+        this.player.startFollow({
+            from: 0,
+            to: 1,
+            delay: 0,
+            duration: 3000,
+            ease: 'Power0',
+            hold: 0,
+        });
+    }
+
+    walkToTown() {
+        let walkPath = this.add.path(this.player.x, this.player.y);
+        walkPath.lineTo(this.town.x, this.town.y);
+
+        this.player.path = walkPath;
+        this.player.startFollow({
+            from: 0,
+            to: 1,
+            delay: 0,
+            duration: 3000,
+            ease: 'Power0',
+            hold: 0,
+        });
     }
     
 }
