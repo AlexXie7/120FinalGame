@@ -91,6 +91,9 @@ class Play extends Phaser.Scene {
         walkPath.lineTo(this.home.x, this.home.y);
 
         this.isWalking = true;
+        setTimeout(() => {
+            this.isWalking = false;
+        }, 3000);
 
         this.player.path = walkPath;
         this.player.startFollow({
@@ -108,6 +111,9 @@ class Play extends Phaser.Scene {
         walkPath.lineTo(this.restaurant.x, this.restaurant.y);
 
         this.isWalking = true;
+        setTimeout(() => {
+            this.isWalking = false;
+        }, 3000);
 
         this.player.path = walkPath;
         this.player.startFollow({
@@ -125,6 +131,9 @@ class Play extends Phaser.Scene {
         walkPath.lineTo(this.town.x, this.town.y);
 
         this.isWalking = true;
+        setTimeout(() => {
+            this.isWalking = false;
+        }, 3000);
 
         this.player.path = walkPath;
         this.player.startFollow({
