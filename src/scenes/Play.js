@@ -48,6 +48,8 @@ class Play extends Phaser.Scene {
 
     }
 
+
+    
     walkToSchool() {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.school.x, this.school.y);
