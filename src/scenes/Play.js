@@ -32,6 +32,20 @@ class Play extends Phaser.Scene {
             yoyo: true,
             rotateToPath: false
         });
+
+
+        // temp minigame testing
+        console.log('launching minigame');
+        let minigameName = 'Name';
+        const sceneName = 'minigame' + minigameName;
+        this.scene.launch(sceneName);
+        this.scene.bringToTop(sceneName);
+        const currentMinigame = this.scene.get(sceneName);
+        setTimeout(() => {
+            const result = currentMinigame.onTimeout();
+            console.log('closing minigame - minigame result:', result);
+            this.scene.stop(currentMinigame);
+        }, 5000);
     }
 
     update() {
