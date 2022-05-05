@@ -10,7 +10,7 @@ class Minigame extends Phaser.Scene {
 
     create() {
         this.playScene = this.scene.get('playScene'); // reference to the play scene
-        this.isCompleted = false; // set when the minigame is finished
+        this.isFinished = false; // set when the minigame is finished
         this.isPassed = false; // set when the minigame is passed, else it means it is a failure
         
         // test minigame code
@@ -21,9 +21,16 @@ class Minigame extends Phaser.Scene {
     }
 
     // called by play.js or minigame manager when the timelimit is up
-    onTimeout() {
-        this.isCompleted = true;
+    timeout() {
+        this.isFinished = true;
         return this.isPassed;
+    }
+
+    // called by any subclass minigame when the minigame is completed before time limit
+    finish(result) {
+        this.isFinished = true;
+        this.isPassed = result;
+        this.playScene.minigameFinished(this, result);
     }
 }
 

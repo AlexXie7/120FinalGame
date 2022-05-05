@@ -48,8 +48,6 @@ class Play extends Phaser.Scene {
 
     }
 
-
-    
     walkToSchool() {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.school.x, this.school.y);
@@ -81,17 +79,28 @@ class Play extends Phaser.Scene {
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
         const currentMinigame = this.scene.get(sceneName);
-        setTimeout(() => {
-            const result = currentMinigame.onTimeout();
-            console.log('closing minigame - minigame result:', result);
+        this.minigameTimeout = setTimeout(() => {
+            const result = currentMinigame.timeout();
+            console.log('time up - closing minigame - minigame result:', result);
             this.scene.stop(currentMinigame);
         }, 5000);
+    }
+
+
+    // called by current minigame when it is finished before the time limit
+    minigameFinished(scene, result) {
+        clearTimeout(this.minigameTimeout);
+        console.log('finished - closing minigame - minigame result:', result);
+        this.scene.stop(scene);
+    }
+
+    update() {
+
     }
 
     walkToHome() {
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.home.x, this.home.y);
-
         this.isWalking = true;
         setTimeout(() => {
             this.isWalking = false;
