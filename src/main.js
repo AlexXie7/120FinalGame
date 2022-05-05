@@ -11,3 +11,12 @@ const config = {
 
 const game = new Phaser.Game(config);
 
+//reserve WASD
+let keyW, keyA, keyS, keyD;
+
+const scaleRatio = window.devicePixelRatio / 3;
+
+// Center Y value of the game
+let gameCenterY = config.scale.height / 2;
+// Center X value of the game
+let gameCenterX = config.scale.width  / 2;
