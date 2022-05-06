@@ -10,97 +10,64 @@ class Play extends Phaser.Scene {
 
     create() {
         this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
+        
+        // Map Zones
+        this.zones = {
+            'school' : {
+                x: gameCenterX * 1.5,
+                y: gameCenterY / 2,
+                minigames: [],
+                sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
+                } ,
+            'home' : {
+                x: gameCenterX,
+                y: gameCenterY,
+                minigames: [],
+                sprite: this.add.rectangle(gameCenterX, gameCenterY, 150, 150, 0xffffff)
+                } ,
+            'restaurant' : {
+                x: gameCenterX / 2,
+                y: gameCenterY * 1.5,
+                minigames: [],
+                sprite: this.add.rectangle(gameCenterX/2, gameCenterY*1.5, 150, 150, 0xffffff)
+                } ,
+            'town' : {
+                x: gameCenterX / 2,
+                y: gameCenterY / 2,
+                minigames: [],
+                sprite: this.add.rectangle(gameCenterX/2, gameCenterY/2, 150, 150, 0xffffff)
+                }
+        }
 
-        // Map Waypoints
-        this.school = {
-            x: game.scale.width  * 3 / 4,
-            y: game.scale.height * 1 / 4,
-            minigames: [],
-            sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
-        };
+        for(const zone in this.zones){
+            console.log(zone);
+            // interactivity for the town sprites
+            this.zones[zone].sprite.setInteractive();
 
-        this.home = {
-            x: gameCenterX,
-            y: gameCenterY,
-            minigames: [],
-            sprite: this.add.rectangle(gameCenterX, gameCenterY, 150, 150, 0xffffff)
-        };
+            // On hover over sprite
+            this.zones[zone].sprite.on('pointerover', () => {
+                console.log('Over the ' + zone);
+            });
 
-        this.restaurant = {
-            x: gameCenterX / 2,
-            y: gameCenterY * 1.5,
-            minigames: [],
-            sprite: this.add.rectangle(gameCenterX/2, gameCenterY*1.5, 150, 150, 0xffffff)
-        };
-
-        //maybe we should rename town to plaza?
-        this.town = {
-            x: gameCenterX / 2,
-            y: gameCenterY / 2,
-            minigames: [],
-            sprite: this.add.rectangle(gameCenterX/2, gameCenterY/2, 150, 150, 0xffffff)
-        };
-
-        // interactivity for the town sprites
-        this.school.sprite.setInteractive();
-        this.home.sprite.setInteractive();
-        this.restaurant.sprite.setInteractive();
-        this.town.sprite.setInteractive();
-
-        // On hover over sprite
-        //we can implement effects in here later
-        this.school.sprite.on('pointerover', () => {
-            console.log('Over the School');
-        });
-        this.home.sprite.on('pointerover', () => {
-            console.log('Over the home');
-        });
-        this.restaurant.sprite.on('pointerover', () => {
-            console.log('Over the restaurant');
-        });
-        this.town.sprite.on('pointerover', () => {
-            console.log('Over the town');
-        });
-
-        // On hover off sprite
-        //we can make sure to shut off the effects here later
-        this.school.sprite.on('pointerout', () => {
-            console.log('Off the School');
-        });
-        this.home.sprite.on('pointerout', () => {
-            console.log('Off the home');
-        });
-        this.restaurant.sprite.on('pointerout', () => {
-            console.log('Off the restaurant');
-        });
-        this.town.sprite.on('pointerout', () => {
-            console.log('Off the town');
-        });
-
-        // On click release
-        // This is how we enter the minigames?
-        this.school.sprite.on('pointerup', () => {
-            console.log('Clicked the School');
-        });
-        this.home.sprite.on('pointerup', () => {
-            console.log('Clicked the home');
-        });
-        this.restaurant.sprite.on('pointerup', () => {
-            console.log('Clicked the restaurant');
-        });
-        this.town.sprite.on('pointerup', () => {
-            console.log('Clicked the town');
-        });
-
+            // On hover off sprite
+            this.zones[zone].sprite.on('pointerout', () => {
+                console.log('Off the ' + zone);
+            });
+            // On click release
+            // This is how we enter the minigames? 
+            this.zones[zone].sprite.on('pointerup', () => {
+                console.log('Clicked the ' + zone);
+            });
+        }
 
         this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player');
 
         this.isWalking = false;
         this.location = "home";
 
-
-        this.walkToSchool();
-        console.log(this.school.sprite.x);
+        this.walkTo('school');
+        //this.walkToSchool();
+        //console.log(this.school.sprite.x);
 
     }
 
@@ -108,10 +75,10 @@ class Play extends Phaser.Scene {
 
     }
 
-    walkToSchool() {
+    walkTo(zone){
         let walkPath = this.add.path(this.player.x, this.player.y);
-        walkPath.lineTo(this.school.x, this.school.y);
-
+        walkPath.lineTo(this.zones[zone].x, this.zones[zone].y); 
+        
         this.isWalking = true;
 
         this.player.path = walkPath;
@@ -127,12 +94,11 @@ class Play extends Phaser.Scene {
             //rotateToPath: false
         });
 
-        this.location = "school";
+        this.location = zone;
 
         setTimeout(() => {
             this.isWalking = false;
         }, 3000);
-
 
         // temp minigame testing
         console.log('launching minigame');
@@ -148,83 +114,11 @@ class Play extends Phaser.Scene {
         }, 5000);
     }
 
-
     // called by current minigame when it is finished before the time limit
     minigameFinished(scene, result) {
         clearTimeout(this.minigameTimeout);
         console.log('finished - closing minigame - minigame result:', result);
         this.scene.stop(scene);
-    }
-
-    walkToHome() {
-        let walkPath = this.add.path(this.player.x, this.player.y);
-        walkPath.lineTo(this.home.x, this.home.y);
-        this.isWalking = true;
-
-
-        this.player.path = walkPath;
-
-        this.player.startFollow({
-            from: 0,
-            to: 1,
-            delay: 0,
-            duration: 3000,
-            ease: 'Power0',
-            hold: 0,
-        });
-
-        this.location = "home";
-
-        setTimeout(() => {
-            this.isWalking = false;
-        }, 3000);
-    }
-
-    walkToRestaurant() {
-        let walkPath = this.add.path(this.player.x, this.player.y);
-        walkPath.lineTo(this.restaurant.x, this.restaurant.y);
-
-        this.isWalking = true;
-
-        this.player.path = walkPath;
-        this.player.startFollow({
-            from: 0,
-            to: 1,
-            delay: 0,
-            duration: 3000,
-            ease: 'Power0',
-            hold: 0,
-        });
-        
-        this.location = "restaurant";
-
-        setTimeout(() => {
-            this.isWalking = false;
-        }, 3000);
-    }
-
-    walkToTown() {
-        let walkPath = this.add.path(this.player.x, this.player.y);
-        walkPath.lineTo(this.town.x, this.town.y);
-
-        this.isWalking = true;
-
-
-        this.player.path = walkPath;
-        this.player.startFollow({
-            from: 0,
-            to: 1,
-            delay: 0,
-            duration: 3000,
-            ease: 'Power0',
-            hold: 0,
-        });
-
-        this.location = "town";
-
-        setTimeout(() => {
-            this.isWalking = false;
-        }, 3000);
     }
 
     launchMinigame(){
