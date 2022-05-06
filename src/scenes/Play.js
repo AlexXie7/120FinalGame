@@ -122,21 +122,7 @@ class Play extends Phaser.Scene {
     }
 
     launchMinigame(){
-        if(this.location == "town"){
-
-        }
-        
-        if(this.location == "restaurant"){
-            
-        }
-        
-        if(this.location == "school"){
-            
-        }
-        
-        if(this.location == "home"){
-            
-        }
+        //something something this.zones[this.location].minigames
     }
     
 }
