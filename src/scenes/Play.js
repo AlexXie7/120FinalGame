@@ -20,15 +20,15 @@ class Play extends Phaser.Scene {
                 sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
                 } ,
             'home' : {
-                x: gameCenterX,
-                y: gameCenterY,
+                x: gameCenterX * 1.5,
+                y: gameCenterY * 1.5,
                 minigames: [],
-                sprite: this.add.rectangle(gameCenterX, gameCenterY, 150, 150, 0xffffff)
+                sprite: this.add.rectangle(gameCenterX*1.5, gameCenterY*1.5, 150, 150, 0xffffff)
                 } ,
             'restaurant' : {
                 x: gameCenterX / 2,
                 y: gameCenterY * 1.5,
-                minigames: [],
+                minigames: ['PickFood'],
                 sprite: this.add.rectangle(gameCenterX/2, gameCenterY*1.5, 150, 150, 0xffffff)
                 } ,
             'town' : {
@@ -57,6 +57,14 @@ class Play extends Phaser.Scene {
             // This is how we enter the minigames? 
             this.zones[zone].sprite.on('pointerup', () => {
                 console.log('Clicked the ' + zone);
+
+                if(this.location == zone){
+                    this.launchMinigame();
+                }
+
+                if(!this.isWalking && this.location != zone){
+                    this.walkTo(zone);
+                }
             });
         }
 
@@ -94,24 +102,13 @@ class Play extends Phaser.Scene {
             //rotateToPath: false
         });
 
-        this.location = zone;
 
         setTimeout(() => {
             this.isWalking = false;
+            this.location = zone;
         }, 3000);
 
-        // temp minigame testing
-        console.log('launching minigame');
-        let minigameName = 'Name';
-        const sceneName = 'minigame' + minigameName;
-        this.scene.launch(sceneName);
-        this.scene.bringToTop(sceneName);
-        const currentMinigame = this.scene.get(sceneName);
-        this.minigameTimeout = setTimeout(() => {
-            const result = currentMinigame.timeout();
-            console.log('time up - closing minigame - minigame result:', result);
-            this.scene.stop(currentMinigame);
-        }, 5000);
+
     }
 
     // called by current minigame when it is finished before the time limit
@@ -123,6 +120,28 @@ class Play extends Phaser.Scene {
 
     launchMinigame(){
         //something something this.zones[this.location].minigames
+        // temp minigame testing
+        console.log('launching minigame');
+        
+        //picks a random minigame from the minigame list
+        let minigameName = this.zones[this.location].minigames[Math.floor(Math.random()*this.zones[this.location].minigames.length)];
+        
+        // console.log(this.location);
+        // console.log(this.zones[this.location]);
+        // console.log(minigameName);
+
+        const sceneName = 'minigame' + minigameName;
+
+        console.log(sceneName);
+
+        this.scene.launch(sceneName);
+        this.scene.bringToTop(sceneName);
+        const currentMinigame = this.scene.get(sceneName);
+        this.minigameTimeout = setTimeout(() => {
+            const result = currentMinigame.timeout();
+            console.log('time up - closing minigame - minigame result:', result);
+            this.scene.stop(currentMinigame);
+        }, 5000);
     }
     
 }

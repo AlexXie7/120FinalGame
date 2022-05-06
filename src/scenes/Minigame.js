@@ -8,6 +8,10 @@ class Minigame extends Phaser.Scene {
         console.log('constructing minigame' + id);
     }
 
+    preload(){
+        
+    }
+
     create() {
         this.playScene = this.scene.get('playScene'); // reference to the play scene
         this.isFinished = false; // set when the minigame is finished
