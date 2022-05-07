@@ -59,6 +59,12 @@ class Play extends Phaser.Scene {
                 console.log('Clicked the ' + zone);
 
                 if(this.location == zone){
+
+                    //disable interactivity
+                    for(const dZone in this.zones){
+                        this.zones[dZone].sprite.disableInteractive();
+                    }
+
                     this.launchMinigame();
                 }
 
@@ -116,6 +122,11 @@ class Play extends Phaser.Scene {
         clearTimeout(this.minigameTimeout);
         console.log('finished - closing minigame - minigame result:', result);
         this.scene.stop(scene);
+        
+        //reenable interactivity
+        for(const zone in this.zones){
+            this.zones[zone].sprite.setInteractive();            
+        }
     }
 
     launchMinigame(){
