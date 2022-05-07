@@ -28,13 +28,25 @@ class minigamePickFood extends Minigame {
         this.foodA = this.wrongFood[Math.floor(Math.random()*this.wrongFood.length)];
         this.foodB = this.rightFood[Math.floor(Math.random()*this.rightFood.length)];
 
-        if(Math.random < .5){
-            this.add.sprite(gameCenterX - 300, gameCenterY, this.foodA);
-            this.add.sprite(gameCenterX + 300, gameCenterY, this.foodB);
+        let leftRight = Math.random();
+        if(leftRight < .5){
+            this.wrong = this.add.sprite(gameCenterX - 300, gameCenterY, this.foodA);
+            this.right = this.add.sprite(gameCenterX + 300, gameCenterY, this.foodB);
         } else {
-            this.add.sprite(gameCenterX - 300, gameCenterY, this.foodA);
-            this.add.sprite(gameCenterX + 300, gameCenterY, this.foodB);
+            this.right = this.add.sprite(gameCenterX - 300, gameCenterY, this.foodB);
+            this.wrong = this.add.sprite(gameCenterX + 300, gameCenterY, this.foodA);
         }
+
+        this.right.setInteractive();
+        this.wrong.setInteractive(); 
+
+        this.right.on('pointerup', () => {
+            this.finish(true);
+        });
+
+        this.wrong.on('pointerup', () => {
+            this.finish(false);
+        });
 
     }
 
