@@ -18,7 +18,7 @@ class Minigame extends Phaser.Scene {
         this.isPassed = false; // set when the minigame is passed, else it means it is a failure
         
         // test minigame code
-        this.add.rectangle(20, 20, game.config.width - 40, game.config.height - 40, '#FCF');
+        // this.add.rectangle(20, 20, game.config.width - 40, game.config.height - 40, '#FCF');
         this.add.text(40, 40, 'minigame' + this.id);
 
         console.log('created');

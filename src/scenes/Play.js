@@ -16,7 +16,7 @@ class Play extends Phaser.Scene {
             'school' : {
                 x: gameCenterX * 1.5,
                 y: gameCenterY / 2,
-                minigames: [],
+                minigames: ['SchoolGum'],
                 sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
                 } ,
             'home' : {
@@ -125,7 +125,8 @@ class Play extends Phaser.Scene {
         
         //reenable interactivity
         for(const zone in this.zones){
-            this.zones[zone].sprite.setInteractive();            
+            this.zones[zone].sprite.setInteractive();     
+            console.log(zone);       
         }
     }
 
@@ -150,8 +151,9 @@ class Play extends Phaser.Scene {
         const currentMinigame = this.scene.get(sceneName);
         this.minigameTimeout = setTimeout(() => {
             const result = currentMinigame.timeout();
-            console.log('time up - closing minigame - minigame result:', result);
-            this.scene.stop(currentMinigame);
+            console.log('time up');
+            // this.scene.stop(currentMinigame);
+            this.minigameFinished(currentMinigame, result);
         }, 5000);
     }
     
