@@ -6,7 +6,7 @@ const config = {
         width: window.innerWidth * window.devicePixelRatio,
         height: window.innerHeight * window.devicePixelRatio
     },
-    scene: [Play, Minigame, minigamePickFood],
+    scene: [Play, Minigame, minigamePickFood, minigameSchoolGum],
 };
 
 const game = new Phaser.Game(config);
