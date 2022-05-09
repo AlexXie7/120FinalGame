@@ -112,7 +112,7 @@ class Play extends Phaser.Scene {
         setTimeout(() => {
             this.isWalking = false;
             this.location = zone;
-        }, 3000);
+        }, 1000);
 
 
     }
