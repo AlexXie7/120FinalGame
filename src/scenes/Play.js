@@ -83,6 +83,8 @@ class Play extends Phaser.Scene {
         //this.walkToSchool();
         //console.log(this.school.sprite.x);
 
+        this.scene.launch('uiScene');
+        this.scene.bringToTop('uiScene');
     }
 
     update() {
@@ -148,6 +150,8 @@ class Play extends Phaser.Scene {
 
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
+        this.scene.bringToTop('uiScene'); // move UI scene to the top
+
         const currentMinigame = this.scene.get(sceneName);
         this.minigameTimeout = setTimeout(() => {
             const result = currentMinigame.timeout();

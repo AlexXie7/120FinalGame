@@ -17,6 +17,9 @@ class minigameSchoolGum extends Minigame {
     create() {
         super.create();
 
+        // get ui scene
+        this.uiScene = this.scene.get('uiScene');
+
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xFFFFFF).setOrigin(0);
         const bg = this.add.image(0,0,'classroom').setOrigin(0)
         bg.setScale(
@@ -46,6 +49,9 @@ class minigameSchoolGum extends Minigame {
         // create starter gum
         this.gum = this.add.image(this.startX, this.startY, 'gum').setOrigin(.5);
         this.gum.setTint(this.randomTint(), this.randomTint(), this.randomTint(), this.randomTint());
+
+        // set minigame result
+        this.isPassed = true // set to true by default
     }
 
     update(time, delta) {
@@ -109,11 +115,15 @@ class minigameSchoolGum extends Minigame {
         // update objects sort of
         for (const object of this.objects) {
             // shake objects by shake amount
-            object.shakeAmount -= (object.shakeAmount) * .1;
+            object.shakeAmount -= (object.shakeAmount) * .02 * delta;
             object.y = object.defaultY + Math.sin(time * .2) * object.shakeAmount;
         }
     }
 
+    // called when the minigame runs out of time
+    onTimeout() {
+        // this.uiScene.clearSigns();
+    }
 
     // checks if a world x y position is touching an object based on its texture
     checkCollision(x, y, object) {
@@ -146,9 +156,11 @@ class minigameSchoolGum extends Minigame {
                 for (const object of this.objects) {
                     const result = this.checkCollision(gum.x, gum.y, object);
                     if (result) {
-                        object.shakeAmount = 20;
+                        object.shakeAmount = 10;
                         if (object.name === 'trashCan') {
-                            console.log('bad! dont go for trash can');
+                            // console.log('bad! dont go for trash can');
+                            this.uiScene.createFailure(gum.x, gum.y);
+                            this.isPassed = false;
                         }
                     }
                 }

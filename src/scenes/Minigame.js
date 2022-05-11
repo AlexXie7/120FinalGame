@@ -24,14 +24,24 @@ class Minigame extends Phaser.Scene {
         console.log('created');
     }
 
+    // overloaded by minigame subclasses; called by timeout function
+    onTimeout() {
+
+    }
+
     // called by play.js or minigame manager when the timelimit is up
     timeout() {
         this.isFinished = true;
+        this.onTimeout();
         return this.isPassed;
     }
 
     // called by any subclass minigame when the minigame is completed before time limit
     finish(result) {
+        if (this.finishCalled) {
+            return;
+        }
+        this.finishCalled = true;
         this.isFinished = true;
         this.isPassed = result;
         this.playScene.minigameFinished(this, result);
@@ -57,5 +67,14 @@ class MinigameName extends Minigame {
 
     update() {
 
+        // call when the minigame has a finished condition
+        this.finish(true); // true if success, false if failure
+
+        // or simply set isPassed to true or false if the state of the minigame is a success or failure
+        this.isPassed = true;
+    }
+
+    onTimeout() {
+        // do timeout operations ex: clear any ui stuff
     }
 }
