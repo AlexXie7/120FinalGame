@@ -1,11 +1,13 @@
 class minigamePickFood extends Minigame {
     constructor(id = 'PickFood') {
         super(id);
+        this.gameTime = 20000;
     }
 
     preload() {
         super.preload();
 
+        this.uiScene = this.scene.get('uiScene');
 
         // Wrong foods (Way more)
         this.load.image('boba', './assets/minigamePickFood/tempBoba.jpg');
@@ -21,7 +23,11 @@ class minigamePickFood extends Minigame {
     create() {
         super.create();
 
-        this.background = this.add.rectangle(0, 0, gameCenterX*2, gameCenterY*2, 0xFFFFFF).setOrigin(0)
+        this.background = this.add.rectangle(0, 0, gameCenterX*2, gameCenterY*2, 0xFFFFFF).setOrigin(0);
+        this.pointer = game.input.activePointer;
+
+        this.result = false;
+        this.clicked = false;
 
         this.wrongFood = ['boba', 'dumpling', 'ramen', 'sushi'];
         this.rightFood = ['sandwich', 'water'];
@@ -42,13 +48,25 @@ class minigamePickFood extends Minigame {
         this.wrong.setInteractive(); 
 
         this.right.on('pointerup', () => {
-            console.log('Picked Right');
-            this.finish(true);
+            // console.log('Picked Right');
+            this.uiScene.createSuccess(this.pointer.x, this.pointer.y);
+            if(!this.clicked){
+                this.clicked = true;
+                this.result = true;
+            }   
         });
 
         this.wrong.on('pointerup', () => {
-            this.finish(false);
+            this.uiScene.createFailure(this.pointer.x, this.pointer.y);
+            if(!this.clicked){
+                this.clicked = false;
+                this.result = false;
+            }            
         });
+
+        setTimeout(() => {
+            this.finish(this.result);
+        }, this.gameTime);
 
     }
 
