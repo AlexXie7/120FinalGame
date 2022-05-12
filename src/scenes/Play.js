@@ -22,7 +22,7 @@ class Play extends Phaser.Scene {
             'home' : {
                 x: gameCenterX * 1.5,
                 y: gameCenterY * 1.5,
-                minigames: [],
+                minigames: ['RollSushi'],
                 sprite: this.add.rectangle(gameCenterX*1.5, gameCenterY*1.5, 150, 150, 0xffffff)
                 } ,
             'restaurant' : {
