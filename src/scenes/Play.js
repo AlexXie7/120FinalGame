@@ -16,25 +16,25 @@ class Play extends Phaser.Scene {
             'school' : {
                 x: gameCenterX * 1.5,
                 y: gameCenterY / 2,
-                minigames: ['SchoolGum'],
+                minigames: minigameNames['school'],//['SchoolGum'],
                 sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
                 } ,
             'home' : {
                 x: gameCenterX * 1.5,
                 y: gameCenterY * 1.5,
-                minigames: [],
+                minigames: minigameNames['home'],
                 sprite: this.add.rectangle(gameCenterX*1.5, gameCenterY*1.5, 150, 150, 0xffffff)
                 } ,
-            'restaurant' : {
+            'plaza' : {
                 x: gameCenterX / 2,
                 y: gameCenterY * 1.5,
-                minigames: ['PickFood'],
+                minigames: minigameNames['plaza'],// ['PickFood'],
                 sprite: this.add.rectangle(gameCenterX/2, gameCenterY*1.5, 150, 150, 0xffffff)
                 } ,
             'town' : {
                 x: gameCenterX / 2,
                 y: gameCenterY / 2,
-                minigames: [],
+                minigames: minigameNames['town'],
                 sprite: this.add.rectangle(gameCenterX/2, gameCenterY/2, 150, 150, 0xffffff)
                 }
         }
@@ -83,6 +83,7 @@ class Play extends Phaser.Scene {
         //this.walkToSchool();
         //console.log(this.school.sprite.x);
 
+        // launch ui scene and move it to top
         this.scene.launch('uiScene');
         this.scene.bringToTop('uiScene');
     }
