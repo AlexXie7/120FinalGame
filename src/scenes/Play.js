@@ -159,7 +159,7 @@ class Play extends Phaser.Scene {
             console.log('time up');
             // this.scene.stop(currentMinigame);
             this.minigameFinished(currentMinigame, result);
-        }, 5000);
+        }, 15000);
     }
     
 }
