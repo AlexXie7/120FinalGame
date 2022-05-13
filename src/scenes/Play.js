@@ -125,6 +125,8 @@ class Play extends Phaser.Scene {
         clearTimeout(this.minigameTimeout);
         console.log('finished - closing minigame - minigame result:', result);
         this.scene.stop(scene);
+
+        this.scene.get('uiScene').minigameEnd();
         
         //reenable interactivity
         for(const zone in this.zones){
@@ -147,11 +149,13 @@ class Play extends Phaser.Scene {
 
         const sceneName = 'minigame' + minigameName;
 
-        console.log(sceneName);
+        // console.log(sceneName);
 
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
         this.scene.bringToTop('uiScene'); // move UI scene to the top
+
+        this.scene.get('uiScene').minigameStart();
 
         const currentMinigame = this.scene.get(sceneName);
         this.minigameTimeout = setTimeout(() => {
