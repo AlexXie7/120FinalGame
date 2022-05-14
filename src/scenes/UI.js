@@ -13,13 +13,15 @@ class UI extends Phaser.Scene {
 
     create() {
         console.log('ui created');
+
         this.plazaDoors = [
             this.add.image(0,0,'plazaDoor').setOrigin(0),
             this.add.image(game.config.width,0,'plazaDoor').setOrigin(1,0).setFlipX(true)
         ];
-        for (const door of this.plazaDoors) {
+        for (let i = 0; i < this.plazaDoors.length; i++) {
+            const door = this.plazaDoors[i];
             door.closedScaleX = gameCenterX / door.width;
-            door.setScale(door.closedScaleX, game.config.height / door.height);
+            door.setScale(0, game.config.height / door.height); // open by default
 
             door.lifeTime = 500;
             door.timer = 0;
@@ -49,6 +51,9 @@ class UI extends Phaser.Scene {
                 let progress = door.timer / door.lifeTime;
                 if (progress >= 1) {
                     door.isFinished = true;
+                    if (i === 0) {
+                        eventEmitter.emit('doorFinished');
+                    }
                     progress = 1;
                 }
                 
@@ -57,6 +62,7 @@ class UI extends Phaser.Scene {
                 door.timer += delta;
             }
         }
+
         // this.add.text(gameCenterX,gameCenterY,'ui scene', {color: 'black'});
 
         
@@ -122,15 +128,21 @@ class UI extends Phaser.Scene {
     }
 
     openDoor(variant, duration) {
-        for (const door of this.plazaDoors) {
-            door.open(duration);
-        }
+        return new Promise((resolve, reject) => {
+            for (const door of this.plazaDoors) {
+                door.open(duration);
+            }
+            eventEmitter.addListener('doorFinished', () => {resolve()})
+        })
     }
 
     closeDoor(variant, duration) {
-        for (const door of this.plazaDoors) {
-            door.close(duration);
-        }
+        return new Promise((resolve, reject) => {
+            for (const door of this.plazaDoors) {
+                door.close(duration);
+            }
+            eventEmitter.addListener('doorFinished', () => {resolve()})
+        })
     }
 
     setInstructions(text) {
@@ -139,7 +151,7 @@ class UI extends Phaser.Scene {
 
     minigameStart() {
         this.instructions.setVisible(true);
-        this.openDoor();
+        // this.openDoor();
     }
 
     minigameEnd(result) {
@@ -151,7 +163,7 @@ class UI extends Phaser.Scene {
             this.finishFailure.show();
         }
 
-        this.closeDoor();
+        // this.closeDoor();
     }
 
     // temporary signs

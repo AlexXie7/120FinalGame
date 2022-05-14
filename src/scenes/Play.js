@@ -86,10 +86,16 @@ class Play extends Phaser.Scene {
         // launch ui scene and move it to top
         this.scene.launch('uiScene');
         this.scene.bringToTop('uiScene');
+
+        this.minigameTimer = new Timer();
+
+        this.uiScene = this.scene.get('uiScene');
     }
 
-    update() {
+    update(time, delta) {
+        // this.minigameTimer.update(time, delta);
 
+        Timer.update(time, delta);
     }
 
     walkTo(zone){
@@ -120,22 +126,37 @@ class Play extends Phaser.Scene {
 
     }
 
-    // called by current minigame when it is finished before the time limit
-    minigameFinished(scene, result) {
-        clearTimeout(this.minigameTimeout);
+    // called by current minigame when it is finished before the time limit, or when the time limit reached
+    // ALWAYS CALLED
+    async minigameFinished(scene, result) {
+        // clearTimeout(this.minigameTimeout);
+        this.minigameTimer.stop();
         console.log('finished - closing minigame - minigame result:', result);
+
+        this.uiScene.minigameEnd(result);
+        
+        // wait a little before closing door
+        await new Promise((resolve, reject) => {
+            new Timer().start(1000, resolve);
+        });
+
+        // wait for door close
+        await this.uiScene.closeDoor(200);
+
+        // stop the minigame scene
         this.scene.stop(scene);
 
-        this.scene.get('uiScene').minigameEnd();
+        // open doors to map
+        this.uiScene.openDoor(200);
         
-        //reenable interactivity
+        // reenable interactivity
         for(const zone in this.zones){
             this.zones[zone].sprite.setInteractive();     
             console.log(zone);       
         }
     }
 
-    launchMinigame(){
+    async launchMinigame(){
         //something something this.zones[this.location].minigames
         // temp minigame testing
         console.log('launching minigame');
@@ -149,21 +170,23 @@ class Play extends Phaser.Scene {
 
         const sceneName = 'minigame' + minigameName;
 
-        // console.log(sceneName);
+        this.uiScene;
+        await this.uiScene.closeDoor();
+        
 
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
         this.scene.bringToTop('uiScene'); // move UI scene to the top
-
-        this.scene.get('uiScene').minigameStart();
+        await this.uiScene.openDoor();
+        this.uiScene.minigameStart();
 
         const currentMinigame = this.scene.get(sceneName);
-        this.minigameTimeout = setTimeout(() => {
+
+        this.minigameTimer.start(5000, () => {
             const result = currentMinigame.timeout();
-            console.log('time up');
-            // this.scene.stop(currentMinigame);
+            console.log('Minigame ran out of time');
             this.minigameFinished(currentMinigame, result);
-        }, 5000);
+        })
     }
     
 }
