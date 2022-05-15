@@ -16,6 +16,7 @@ class Minigame extends Phaser.Scene {
         this.playScene = this.scene.get('playScene'); // reference to the play scene
         this.isFinished = false; // set when the minigame is finished
         this.isPassed = false; // set when the minigame is passed, else it means it is a failure
+        this.finishCalled = false;
         
         // test minigame code
         // this.add.rectangle(20, 20, game.config.width - 40, game.config.height - 40, '#FCF');
