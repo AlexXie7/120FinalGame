@@ -22,7 +22,7 @@ class minigameSchoolGum extends Minigame {
         this.uiScene.setInstructions('Left click to shoot gum');
 
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xFFFFFF).setOrigin(0);
-        const bg = this.add.image(0,0,'classroom').setOrigin(0)
+        const bg = this.add.image(0,0,'classroom').setOrigin(0).setDepth(-2);
         bg.setScale(
             game.config.width / bg.width,
             game.config.height / bg.height
@@ -51,8 +51,21 @@ class minigameSchoolGum extends Minigame {
         this.gum = this.add.image(this.startX, this.startY, 'gum').setOrigin(.5);
         this.gum.setTint(this.randomTint(), this.randomTint(), this.randomTint(), this.randomTint());
 
+        // gum score
+        this.scoreText = this.add.text(gameCenterX + 100, gameCenterY - 300, '0 / 10', {
+            // fontFamily: '',
+            fontStyle: 'bold',
+            fontSize: '100px',
+            stroke: '#FFF',
+            strokeThickness: 2,
+            color: '#F00',
+        }).setOrigin(0).setDepth(-1);
+        this.score = 0;
+
         // set minigame result
-        this.isPassed = true // set to true by default
+        // this.isPassed = true // set to true by default
+        this.lastGumX = 0;
+        this.lastGumY = 0;
     }
 
     update(time, delta) {
@@ -179,8 +192,33 @@ class minigameSchoolGum extends Minigame {
                             // console.log('bad! dont go for trash can');
                             this.uiScene.createFailure(gum.x, gum.y);
                             this.isPassed = false;
+                            this.score -= 1;
+                            this.scoreText.setText(`${this.score} / 10`);
+                        } else {
+                            if (Phaser.Math.Distance.Between(gum.x, gum.y, this.lastGumX, this.lastGumY) < 10) {
+                                state = 'fall';
+                                timer = 0;
+                                lifeTime = 500;
+                                gum.velY = Math.random() * -.5;
+                                gum.velX = Math.random() * .5 - .25;
+                                return;
+                            } else {
+                                this.score += 1;
+                                this.scoreText.setText(`${this.score} / 10`);
+                                this.lastGumX = gum.x;
+                                this.lastGumY = gum.y;
+                            }
+                        }
+                        if (this.score >= 10) {
+                            this.scoreText.setFill('#0F0');
+                            this.isPassed = true;
+                        } else {
+                            this.scoreText.setFill('#F00');
+                            this.isPassed = false;
                         }
                         gum.isFinished = true;
+
+                        
                     } else {
                         state = 'shrink';
                         timer = 0;
@@ -198,6 +236,15 @@ class minigameSchoolGum extends Minigame {
                     gum.destroy();
                 } else {
                     gum.setScale(.5 - progress * .5);
+                }
+            } else if (state === 'fall') {
+                if (gum.y > game.config.height) {
+                    gum.isFinished = true;
+                    gum.destroy();
+                } else {
+                    gum.velY += delta * .001;
+                    gum.x += gum.velX * delta;
+                    gum.y += gum.velY * delta;
                 }
             }
 
