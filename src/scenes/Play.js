@@ -161,7 +161,7 @@ class Play extends Phaser.Scene {
         }
     }
 
-    async launchMinigame(){
+    async launchMinigame(minigameTimeLimit = 4000){
         //something something this.zones[this.location].minigames
         // temp minigame testing
         console.log('launching minigame');
@@ -191,7 +191,7 @@ class Play extends Phaser.Scene {
 
         const currentMinigame = this.scene.get(sceneName);
 
-        this.minigameTimer.start(4000, () => {
+        this.minigameTimer.start(minigameTimeLimit, () => {
             const result = currentMinigame.timeout();
             console.log('Minigame ran out of time');
             this.minigameFinished(currentMinigame, result);
