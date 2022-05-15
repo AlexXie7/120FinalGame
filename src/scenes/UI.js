@@ -9,6 +9,7 @@ class UI extends Phaser.Scene {
         this.load.image('plazaDoor', './assets/plaza-door.png');
         this.load.image('finishSuccess', './assets/success.png');
         this.load.image('finishFailure', './assets/failure.png');
+        this.load.image('fireworksParticle', './assets/fireworks-particle.png');
     }
 
     create() {
@@ -22,6 +23,7 @@ class UI extends Phaser.Scene {
             const door = this.plazaDoors[i];
             door.closedScaleX = gameCenterX / door.width;
             door.setScale(0, game.config.height / door.height); // open by default
+            door.setDepth(3);
 
             door.lifeTime = 500;
             door.timer = 0;
@@ -66,8 +68,9 @@ class UI extends Phaser.Scene {
         // this.add.text(gameCenterX,gameCenterY,'ui scene', {color: 'black'});
 
         
-        this.activeSigns = [];
+        this.activeSigns = [];  
 
+        // instructions at the top
         const instructionsConfig = {
             fontSize: '64px',
             stroke: '#000',
@@ -76,14 +79,59 @@ class UI extends Phaser.Scene {
         this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5,0);
         this.instructions.setVisible(false);
 
-        this.finishSuccess = this.add.image(gameCenterX, gameCenterY, 'finishSuccess').setOrigin(.5).setVisible(false);
-        this.finishSuccess.show = () => {
+        // success and failure sings (when minigame ends)
+        this.particles = this.add.particles('fireworksParticle');
+        this.particles.setDepth(1);
+        const possibleTints = [
+            0xFF0033,
+            0x267DFF,
+            0xFFFFFF
+        ];
+        
+        const createFireworks = (bias) => {
+            console.log('crating firrwrwrw');
+            const emitter = this.particles.createEmitter({
+                speed: 300,
+                lifespan: 1000,
+                scale: {start: 1, end: 0},
+                tint: possibleTints[Math.floor(Math.random() * possibleTints.length)],
+                gravityY: 500,
+                frequency: -1
+            });
+            emitter.explode(50, gameCenterX + Math.random() * gameCenterX * bias, gameCenterY + Math.random() * 500 - 250);
+            console.log(this.particles.emitters.length);
+        }
+
+        this.finishSuccess = this.add.image(gameCenterX, gameCenterY, 'finishSuccess').setOrigin(.5).setVisible(false).setDepth(2);
+        this.finishSuccess.show = (dur = 500) => {
             this.finishSuccess.setVisible(true);
+            this.finishSuccess.setScale(0);
+            this.finishSuccess.lifeTime = dur;
+            this.finishSuccess.timer = 0;
+            this.finishSuccess.isFinished = false;
+            this.finishSuccess.fireworksTimer = 0;
+            this.finishSuccess.fireworksInterval = dur / 5;
+            this.finishSuccess.fireworksBias = 1;
         }
         this.finishSuccess.update = (time, delta) => {
+            if (this.finishSuccess.visible && !this.finishSuccess.isFinished) {
+                let progress = this.finishSuccess.timer / this.finishSuccess.lifeTime;
+                if (progress > 1) {
+                    progress = 1;
+                    this.finishSuccess.isFinished = true;
+                }
+                if (this.finishSuccess.fireworksTimer > this.finishSuccess.fireworksInterval) {
+                    createFireworks(this.finishSuccess.fireworksBias);
+                    this.finishSuccess.fireworksBias *= -1;
+                    this.finishSuccess.fireworksTimer -= this.finishSuccess.fireworksInterval;
+                }
+                this.finishSuccess.fireworksTimer += delta;
 
+                this.finishSuccess.setScale(progress * progress);
+                this.finishSuccess.timer += delta;
+            }
         }
-        this.finishFailure = this.add.image(gameCenterX, gameCenterY, 'finishFailure').setOrigin(.5).setVisible(false);
+        this.finishFailure = this.add.image(gameCenterX, gameCenterY, 'finishFailure').setOrigin(.5).setVisible(false).setDepth(2);
         this.finishFailure.show = (dur = 500) => {
             this.finishFailure.setVisible(true);
             this.finishFailure.setScale(10);
@@ -104,6 +152,14 @@ class UI extends Phaser.Scene {
                 this.finishFailure.timer += delta;
             }
         }
+        eventEmitter.on('doorFinished', () => {
+            this.finishSuccess.setVisible(false);
+            while (this.particles.emitters.length > 0) {
+                this.particles.removeEmitter(this.particles.emitters.getAt(0));
+            }
+
+            this.finishFailure.setVisible(false);
+        });
     }
 
     update(time, delta) {
@@ -127,7 +183,7 @@ class UI extends Phaser.Scene {
         }
     }
 
-    openDoor(variant, duration) {
+    openDoor(duration) {
         return new Promise((resolve, reject) => {
             for (const door of this.plazaDoors) {
                 door.open(duration);
@@ -136,7 +192,7 @@ class UI extends Phaser.Scene {
         })
     }
 
-    closeDoor(variant, duration) {
+    closeDoor(duration) {
         return new Promise((resolve, reject) => {
             for (const door of this.plazaDoors) {
                 door.close(duration);

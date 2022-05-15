@@ -141,13 +141,13 @@ class Play extends Phaser.Scene {
         });
 
         // wait for door close
-        await this.uiScene.closeDoor(200);
+        await this.uiScene.closeDoor(300);
 
         // stop the minigame scene
         this.scene.stop(scene);
 
         // open doors to map
-        this.uiScene.openDoor(200);
+        this.uiScene.openDoor(300);
         
         // reenable interactivity
         for(const zone in this.zones){
@@ -170,19 +170,23 @@ class Play extends Phaser.Scene {
 
         const sceneName = 'minigame' + minigameName;
 
-        this.uiScene;
-        await this.uiScene.closeDoor();
+        // wait for door to close
+        await this.uiScene.closeDoor(300);
         
-
+        // launch minigame
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
         this.scene.bringToTop('uiScene'); // move UI scene to the top
-        await this.uiScene.openDoor();
+
+        // wait for door to open
+        await this.uiScene.openDoor(300);
+
+        // then start minigame and timers
         this.uiScene.minigameStart();
 
         const currentMinigame = this.scene.get(sceneName);
 
-        this.minigameTimer.start(5000, () => {
+        this.minigameTimer.start(4000, () => {
             const result = currentMinigame.timeout();
             console.log('Minigame ran out of time');
             this.minigameFinished(currentMinigame, result);
