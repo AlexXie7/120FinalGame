@@ -51,3 +51,6 @@ const scaleRatio = window.devicePixelRatio / 3;
 let gameCenterY = config.scale.height / 2;
 // Center X value of the game
 let gameCenterX = config.scale.width  / 2;
+
+// phaser event manager
+const eventEmitter = new Phaser.Events.EventEmitter();

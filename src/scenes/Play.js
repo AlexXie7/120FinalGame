@@ -86,10 +86,21 @@ class Play extends Phaser.Scene {
         // launch ui scene and move it to top
         this.scene.launch('uiScene');
         this.scene.bringToTop('uiScene');
+
+        this.minigameTimer = new Timer();
+
+        this.uiScene = this.scene.get('uiScene');
     }
 
-    update() {
+    update(time, delta) {
+        // updates all timers created by the Timer class
+        Timer.update(time, delta);
 
+        // update the timer on the UI
+        if (this.minigameTimer.isActive) {
+            this.uiScene.setTimerProgress(this.minigameTimer.getProgress());
+        }
+        
     }
 
     walkTo(zone){
@@ -120,20 +131,37 @@ class Play extends Phaser.Scene {
 
     }
 
-    // called by current minigame when it is finished before the time limit
-    minigameFinished(scene, result) {
-        clearTimeout(this.minigameTimeout);
+    // called by current minigame when it is finished before the time limit, or when the time limit reached
+    // ALWAYS CALLED
+    async minigameFinished(scene, result) {
+        // clearTimeout(this.minigameTimeout);
+        this.minigameTimer.stop();
         console.log('finished - closing minigame - minigame result:', result);
-        this.scene.stop(scene);
+
+        this.uiScene.minigameEnd(result);
         
-        //reenable interactivity
+        // wait a little before closing door
+        await new Promise((resolve, reject) => {
+            new Timer().start(1000, resolve);
+        });
+
+        // wait for door close
+        await this.uiScene.closeDoor(300);
+
+        // stop the minigame scene
+        this.scene.stop(scene);
+
+        // open doors to map
+        this.uiScene.openDoor(300);
+        
+        // reenable interactivity
         for(const zone in this.zones){
             this.zones[zone].sprite.setInteractive();     
             console.log(zone);       
         }
     }
 
-    launchMinigame(){
+    async launchMinigame(){
         //something something this.zones[this.location].minigames
         // temp minigame testing
         console.log('launching minigame');
@@ -147,19 +175,27 @@ class Play extends Phaser.Scene {
 
         const sceneName = 'minigame' + minigameName;
 
-        console.log(sceneName);
-
+        // wait for door to close
+        await this.uiScene.closeDoor(300);
+        
+        // launch minigame
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
         this.scene.bringToTop('uiScene'); // move UI scene to the top
 
+        // wait for door to open
+        await this.uiScene.openDoor(300);
+
+        // then start minigame and timers
+        this.uiScene.minigameStart();
+
         const currentMinigame = this.scene.get(sceneName);
-        this.minigameTimeout = setTimeout(() => {
+
+        this.minigameTimer.start(4000, () => {
             const result = currentMinigame.timeout();
-            console.log('time up');
-            // this.scene.stop(currentMinigame);
+            console.log('Minigame ran out of time');
             this.minigameFinished(currentMinigame, result);
-        }, 15000);
+        });
     }
     
 }
