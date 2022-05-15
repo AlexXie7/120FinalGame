@@ -64,10 +64,7 @@ class minigamePickFood extends Minigame {
             }            
         });
 
-        setTimeout(() => {
-            this.finish(this.result);
-        }, this.gameTime);
-
+        
     }
 
     update() {
