@@ -7,6 +7,7 @@ class Timer {
         this.timer = 0;
         this.enabled = true;
         this.paused = false;
+        this.isActive = false;
         this.isFinished = true;
         this.callbacks = options.callbacks || [];
         if (options.callback) {
@@ -37,6 +38,7 @@ class Timer {
     start(duration, callback) {
         this.lifeTime = duration || this.lifeTime;
         this.isFinished = false;
+        this.isActive = true;
         this.timer = 0;
         if (callback) {
             this.callbacks.push(callback);
@@ -47,8 +49,15 @@ class Timer {
     // stops timer
     stop() {
         this.isFinished = true;
+        this.isActive = false;
         this.callbacks = [];
     }
+
+    // get the timer progress between 0 and 1
+    getProgress() {
+        return this.timer / this.lifeTime;
+    }
+
     // sets the pause state of the timer
     setPaused(bool) {
         this.paused = bool;

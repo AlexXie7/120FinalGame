@@ -19,7 +19,7 @@ class minigameSchoolGum extends Minigame {
 
         // get ui scene
         this.uiScene = this.scene.get('uiScene');
-        this.uiScene.setInstructions('Left click - Shoot gum');
+        this.uiScene.setInstructions('Left click to shoot gum');
 
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xFFFFFF).setOrigin(0);
         const bg = this.add.image(0,0,'classroom').setOrigin(0)
@@ -56,6 +56,12 @@ class minigameSchoolGum extends Minigame {
     }
 
     update(time, delta) {
+        super.update(time, delta);
+
+        if (this.isFinished) {
+            return;
+        }
+
         const pointer = game.input.activePointer;
 
         // draw gum throwing arc
@@ -132,9 +138,9 @@ class minigameSchoolGum extends Minigame {
         const key = object.texture.key;
         const alpha = game.textures.getPixelAlpha(x - object.x + object.width * object.originX, y - object.y + object.height * object.originY, key, 0);
         if (alpha > 127) {
-            return true;
+            return object;
         }
-        return false;
+        return;
     }
 
     // shoots gum from the player pov to the world to hit an object
@@ -143,36 +149,57 @@ class minigameSchoolGum extends Minigame {
         const gum = this.gum;
         let timer = 0;
         let progress = 0;
+        let state = 'fly';
         const differenceX = endX - startX;
         const differenceY = endY - startY;
 
         // gum update function
         gum.update = (time, delta) => {
-            if (progress >= 1) {
-                gum.x = endX;
-                gum.y = endY;
-                gum.isFinished = true;
-
-                // check for a hit
-                for (const object of this.objects) {
-                    const result = this.checkCollision(gum.x, gum.y, object);
+            if (gum.isFinished) {
+                return;
+            }
+ 
+            if (state === 'fly') {
+                if (progress >= 1) {
+                    gum.x = endX;
+                    gum.y = endY;
+                    
+                    progress = 1;
+    
+                    // check for a hit
+                    let result;
+                    for (const object of this.objects) {
+                        result = this.checkCollision(gum.x, gum.y, object);
+                        if (result) break;
+                    }
+    
                     if (result) {
-                        object.shakeAmount = 10;
-                        if (object.name === 'trashCan') {
+                        result.shakeAmount = 10;
+                        if (result.name === 'trashCan') {
                             // console.log('bad! dont go for trash can');
                             this.uiScene.createFailure(gum.x, gum.y);
                             this.isPassed = false;
                         }
+                        gum.isFinished = true;
+                    } else {
+                        state = 'shrink';
+                        timer = 0;
+                        lifeTime = 500;
                     }
                 }
-
-                return;
+    
+                // set gum position during flight
+                gum.x = startX + progress * differenceX;
+                gum.y = startY + progress * differenceY - this.arc(progress) * arcMod;
+                gum.scale = (1 - progress * .5);
+            } else if (state === 'shrink') {
+                if (progress > 1) {
+                    gum.isFinished = true;
+                    gum.destroy();
+                } else {
+                    gum.setScale(.5 - progress * .5);
+                }
             }
-
-            // set gum position during flight
-            gum.x = startX + progress * differenceX;
-            gum.y = startY + progress * differenceY - this.arc(progress) * arcMod;
-            gum.scale = (1 - progress * .5);
 
             timer += delta;
             progress = timer / lifeTime;

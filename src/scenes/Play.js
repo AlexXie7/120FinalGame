@@ -93,9 +93,14 @@ class Play extends Phaser.Scene {
     }
 
     update(time, delta) {
-        // this.minigameTimer.update(time, delta);
-
+        // updates all timers created by the Timer class
         Timer.update(time, delta);
+
+        // update the timer on the UI
+        if (this.minigameTimer.isActive) {
+            this.uiScene.setTimerProgress(this.minigameTimer.getProgress());
+        }
+        
     }
 
     walkTo(zone){

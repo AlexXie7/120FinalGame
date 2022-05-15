@@ -15,6 +15,7 @@ class UI extends Phaser.Scene {
     create() {
         console.log('ui created');
 
+        // plaza style doors. might change to be inside a dictionary later
         this.plazaDoors = [
             this.add.image(0,0,'plazaDoor').setOrigin(0),
             this.add.image(game.config.width,0,'plazaDoor').setOrigin(1,0).setFlipX(true)
@@ -65,9 +66,7 @@ class UI extends Phaser.Scene {
             }
         }
 
-        // this.add.text(gameCenterX,gameCenterY,'ui scene', {color: 'black'});
-
-        
+        // active signs that are getting updated (o and x and other stuff possibly);
         this.activeSigns = [];  
 
         // instructions at the top
@@ -79,17 +78,18 @@ class UI extends Phaser.Scene {
         this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5,0);
         this.instructions.setVisible(false);
 
-        // success and failure sings (when minigame ends)
+        // particles for fireworks
         this.particles = this.add.particles('fireworksParticle');
         this.particles.setDepth(1);
+        // possible firework tints
         const possibleTints = [
             0xFF0033,
             0x267DFF,
             0xFFFFFF
         ];
         
+        // creates fireworks at random position multiplied by bias (determines whether its on left or right side of screen)
         const createFireworks = (bias) => {
-            console.log('crating firrwrwrw');
             const emitter = this.particles.createEmitter({
                 speed: 300,
                 lifespan: 1000,
@@ -99,9 +99,9 @@ class UI extends Phaser.Scene {
                 frequency: -1
             });
             emitter.explode(50, gameCenterX + Math.random() * gameCenterX * bias, gameCenterY + Math.random() * 500 - 250);
-            console.log(this.particles.emitters.length);
         }
 
+        // success and failure sings (when minigame ends)
         this.finishSuccess = this.add.image(gameCenterX, gameCenterY, 'finishSuccess').setOrigin(.5).setVisible(false).setDepth(2);
         this.finishSuccess.show = (dur = 500) => {
             this.finishSuccess.setVisible(true);
@@ -127,7 +127,7 @@ class UI extends Phaser.Scene {
                 }
                 this.finishSuccess.fireworksTimer += delta;
 
-                this.finishSuccess.setScale(progress * progress);
+                this.finishSuccess.setScale(Math.sqrt(progress));
                 this.finishSuccess.timer += delta;
             }
         }
@@ -152,14 +152,17 @@ class UI extends Phaser.Scene {
                 this.finishFailure.timer += delta;
             }
         }
+        // when door finishes (in this case door close), hide signs and destroy emitters
         eventEmitter.on('doorFinished', () => {
             this.finishSuccess.setVisible(false);
+            this.finishFailure.setVisible(false);
             while (this.particles.emitters.length > 0) {
                 this.particles.removeEmitter(this.particles.emitters.getAt(0));
             }
-
-            this.finishFailure.setVisible(false);
         });
+
+        // add visual timer
+        this.timerBar = this.add.rectangle(0,game.config.height,game.config.width,40,0x00FF00).setOrigin(0,1).setVisible(false);
     }
 
     update(time, delta) {
@@ -207,19 +210,23 @@ class UI extends Phaser.Scene {
 
     minigameStart() {
         this.instructions.setVisible(true);
-        // this.openDoor();
+        this.timerBar.setVisible(true);
     }
 
     minigameEnd(result) {
         this.instructions.setVisible(false);
+        this.timerBar.setVisible(false);
 
         if (result) {
             this.finishSuccess.show();
         } else {
             this.finishFailure.show();
         }
+    }
 
-        // this.closeDoor();
+    // percent elapsed; 0 = start; 1 = end
+    setTimerProgress(percent) {
+        this.timerBar.setScale(1 - percent, 1);
     }
 
     // temporary signs
