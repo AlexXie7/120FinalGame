@@ -7,8 +7,6 @@ class minigamePickFood extends Minigame {
     preload() {
         super.preload();
 
-        this.uiScene = this.scene.get('uiScene');
-
         // Wrong foods (Way more)
         this.load.image('boba', './assets/minigamePickFood/tempBoba.jpg');
         this.load.image('dumpling', './assets/minigamePickFood/tempDumpling.jpg');
@@ -22,6 +20,9 @@ class minigamePickFood extends Minigame {
 
     create() {
         super.create();
+        
+        this.uiScene = this.scene.get('uiScene');
+        this.uiScene.setInstructions('Eat American Food!');
 
         this.background = this.add.rectangle(0, 0, gameCenterX*2, gameCenterY*2, 0xFFFFFF).setOrigin(0);
         this.pointer = game.input.activePointer;
