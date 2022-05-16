@@ -10,6 +10,10 @@ class UI extends Phaser.Scene {
         this.load.image('finishSuccess', './assets/success.png');
         this.load.image('finishFailure', './assets/failure.png');
         this.load.image('fireworksParticle', './assets/fireworks-particle.png');
+
+        //load sounds
+        this.load.audio('soundSuccess', './assets/right.wav');
+        this.load.audio('soundFailure', './assets/wrong.wav');
     }
 
     create() {
@@ -276,10 +280,12 @@ class UI extends Phaser.Scene {
 
     createSuccess(x, y) {
         this.createSign(x, y, 'signGood');
+        this.sound.play('soundSuccess');
     }
 
     createFailure(x, y) {
         this.createSign(x, y, 'signBad');
+        this.sound.play('soundFailure');
     }
 }
 

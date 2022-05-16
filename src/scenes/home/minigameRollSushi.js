@@ -6,17 +6,18 @@ class minigameRollSushi extends Minigame {
     preload() {
         super.preload();
 
-        this.uiScene = this.scene.get('uiScene');
         this.load.image('sushiMat', './assets/minigameRollSushi/tempSushiMat.jpg');
         this.load.image('jelly', './assets/minigameRollSushi/tempJ.jpg');
         this.load.image('pb', './assets/minigameRollSushi/tempPB.png');
         this.load.image('arrowUp', './assets/minigameRollSushi/tempArrowUp.png')
         
-
     }
 
     create() {
         super.create();
+
+        this.uiScene = this.scene.get('uiScene');
+        this.uiScene.setInstructions('Make Sushi!');
 
         this.bg = this.add.sprite(gameCenterX, gameCenterY, 'sushiMat').setDisplaySize(game.scale.width, game.scale.height);
 
