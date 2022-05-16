@@ -96,7 +96,8 @@ class UI extends Phaser.Scene {
                 scale: {start: 1, end: 0},
                 tint: possibleTints[Math.floor(Math.random() * possibleTints.length)],
                 gravityY: 500,
-                frequency: -1
+                frequency: -1,
+                blendMode: Phaser.BlendModes.ADD
             });
             emitter.explode(50, gameCenterX + Math.random() * gameCenterX * bias, gameCenterY + Math.random() * 500 - 250);
         }

@@ -6,6 +6,7 @@ class Play extends Phaser.Scene {
     preload() {
         this.load.image('map', './assets/TempMap.png');
         this.load.image('player', './assets/TempPlayer.png');
+        this.load.audio('bgm', './assets/bgm.wav');
     }
 
     create() {
@@ -90,6 +91,8 @@ class Play extends Phaser.Scene {
         this.minigameTimer = new Timer();
 
         this.uiScene = this.scene.get('uiScene');
+
+        this.sound.play('bgm', {loop:true, volume:.5});
     }
 
     update(time, delta) {
