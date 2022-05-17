@@ -164,7 +164,7 @@ class Play extends Phaser.Scene {
         }
     }
 
-    async launchMinigame(minigameTimeLimit = 4000){
+    async launchMinigame(minigameTimeLimit = 15000){
         //something something this.zones[this.location].minigames
         // temp minigame testing
         console.log('launching minigame');

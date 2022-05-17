@@ -53,15 +53,15 @@ class minigamePickFood extends Minigame {
             this.uiScene.createSuccess(this.pointer.x, this.pointer.y);
             if(!this.clicked){
                 this.clicked = true;
-                this.result = true;
+                this.isPassed = true;
             }   
         });
 
         this.wrong.on('pointerup', () => {
             this.uiScene.createFailure(this.pointer.x, this.pointer.y);
             if(!this.clicked){
-                this.clicked = false;
-                this.result = false;
+                this.clicked = true;
+                this.isPassed = false;
             }            
         });
 
