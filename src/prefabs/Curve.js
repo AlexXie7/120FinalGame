@@ -1,9 +1,9 @@
 
 function lerp(a, b, t = 0) {
-    return {
-        x: a.x + t * (b.x - a.x),
-        y: a.y + t * (b.y - a.y)
-    };
+    return new Phaser.Math.Vector2(
+        a.x + t * (b.x - a.x),
+        a.y + t * (b.y - a.y)
+    );
 }
 
 // use Phaser vector2s or objects of {x,y}

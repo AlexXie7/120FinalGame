@@ -34,22 +34,33 @@ const config = {
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: window.innerWidth * window.devicePixelRatio,
-        height: window.innerHeight * window.devicePixelRatio
+        // width: window.innerWidth * window.devicePixelRatio,
+        // height: window.innerHeight * window.devicePixelRatio
     },
     scene: [Play, Minigame, UI].concat(minigameClasses), // adds minigameClasses to the scene list
 };
 
+const aspectRatio = 4 / 3;
+
+const leastLength = Math.min(window.innerWidth, window.innerHeight)
+if (window.innerWidth < window.innerHeight) {
+    config.scale.width = window.innerWidth;
+    config.scale.height = window.innerWidth / aspectRatio;
+} else {
+    config.scale.width = window.innerHeight * aspectRatio;
+    config.scale.height = window.innerHeight;
+}
+
 const game = new Phaser.Game(config);
 
-//reserve WASD
+// reserve WASD
 let keyW, keyA, keyS, keyD;
 
 const scaleRatio = window.devicePixelRatio / 3;
 
-// Center Y value of the game
+// center Y value of the game
 let gameCenterY = config.scale.height / 2;
-// Center X value of the game
+// center X value of the game
 let gameCenterX = config.scale.width  / 2;
 
 // phaser event manager
