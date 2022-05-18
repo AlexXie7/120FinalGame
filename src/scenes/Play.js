@@ -12,7 +12,6 @@ class Play extends Phaser.Scene {
         this.load.image('player', './assets/TempPlayer.png');
         this.load.audio('bgm', './assets/bgm.wav');
 
-        this.load.image('temp', './assets/Plaza-modified.png')
     }
 
     create() {
