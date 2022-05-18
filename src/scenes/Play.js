@@ -4,9 +4,15 @@ class Play extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('map', './assets/TempMap.png');
+        this.load.image('map', './assets/Map.png');
+        this.load.image('school', './assets/School.png');
+        this.load.image('town', './assets/Town.png');
+        this.load.image('plaza', './assets/Plaza.png');
+        this.load.image('home', './assets/Home.png');
         this.load.image('player', './assets/TempPlayer.png');
         this.load.audio('bgm', './assets/bgm.wav');
+
+        this.load.image('temp', './assets/Plaza-modified.png')
     }
 
     create() {
@@ -15,28 +21,28 @@ class Play extends Phaser.Scene {
         // Map Zones
         this.zones = {
             'school' : {
-                x: gameCenterX * 1.5,
-                y: gameCenterY / 2,
+                x: gameCenterX * 1.63,
+                y: gameCenterY * 1.18,
                 minigames: minigameNames['school'],//['SchoolGum'],
-                sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * 1.63, gameCenterY*1.18, 'school').setScale(.9)
                 } ,
             'home' : {
                 x: gameCenterX * 1.5,
                 y: gameCenterY * 1.5,
                 minigames: minigameNames['home'],
-                sprite: this.add.rectangle(gameCenterX*1.5, gameCenterY*1.5, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * .5, gameCenterY * 1.33, 'home').setScale(.85)
                 } ,
             'plaza' : {
                 x: gameCenterX / 2,
                 y: gameCenterY * 1.5,
                 minigames: minigameNames['plaza'],// ['PickFood'],
-                sprite: this.add.rectangle(gameCenterX/2, gameCenterY*1.5, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * .73, gameCenterY * .5, 'plaza').setScale(.85)
                 } ,
             'town' : {
                 x: gameCenterX / 2,
                 y: gameCenterY / 2,
                 minigames: minigameNames['town'],
-                sprite: this.add.rectangle(gameCenterX/2, gameCenterY/2, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * 1.57, gameCenterY * .64, 'town').setScale(.8)
                 }
         }
 
@@ -200,5 +206,17 @@ class Play extends Phaser.Scene {
             this.minigameFinished(currentMinigame, result);
         });
     }
+
+    // checks if a world x y position is touching an object based on its texture
+    checkCollision(x, y, object) {
+        if (!object) return;
+        const key = object.texture.key;
+        const alpha = game.textures.getPixelAlpha(x - object.x + object.width * object.originX, y - object.y + object.height * object.originY, key, 0);
+        if (alpha > 127) {
+            return object;
+        }
+        return;
+    }
+    
     
 }
