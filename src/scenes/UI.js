@@ -11,6 +11,8 @@ class UI extends Phaser.Scene {
         this.load.image('finishFailure', './assets/failure.png');
         this.load.image('fireworksParticle', './assets/fireworks-particle.png');
 
+        this.load.image('flagSmall', './assets/flag-small.png');
+
         //load sounds
         this.load.audio('soundSuccess', './assets/right.wav');
         this.load.audio('soundFailure', './assets/wrong.wav');
@@ -168,6 +170,16 @@ class UI extends Phaser.Scene {
 
         // add visual timer
         this.timerBar = this.add.rectangle(0,game.config.height,game.config.width,40,0x00FF00).setOrigin(0,1).setVisible(false);
+
+        // add lives (flags)
+        this.startLives = 4;
+        this.lives = 0;
+        this.flags = [];
+        this.removedFlags = [];
+        for (let i = 0; i < this.startLives; i++) {
+            this.addLife();
+        }
+        
     }
 
     update(time, delta) {
@@ -189,6 +201,16 @@ class UI extends Phaser.Scene {
                 sign.update(time, delta);
             }
         }
+
+        for (let i = 0; i < this.removedFlags.length; i++) {
+            const flag = this.removedFlags[i];
+            if (flag.isDestroyed) {
+                this.removedFlags.splice(i, 1);
+                i -= 1;
+            } else {
+                flag.update(time, delta);
+            }
+        }
     }
 
     openDoor(duration) {
@@ -207,6 +229,67 @@ class UI extends Phaser.Scene {
             }
             eventEmitter.addListener('doorFinished', () => {resolve()})
         })
+    }
+
+    addLife() {
+        const gap = 20;
+        const flag = this.add.image(
+            20 + 75 + this.flags.length * (150 + gap),
+            20 + 50,
+            'flagSmall'
+        ).setOrigin(.5).setDepth(4);
+        this.flags.push(flag);
+        this.lives += 1;
+    }
+
+    removeLife() {
+        if (this.flags.length > 0) {
+            const flag = this.flags.pop();
+            this.removedFlags.push(flag);
+            flag.velX = Math.random() * .1;
+            flag.velY = Math.random() * .3 - .15;
+            flag.isFalling = true;
+            flag.update = (time, delta) => {
+                if (flag.isDestroyed) {
+                    return;
+                }
+                if (flag.isFalling) {
+                    flag.velY += delta * .002;
+                    flag.x += flag.velX * delta;
+                    flag.y += flag.velY * delta;
+                    flag.rotation += flag.velY * .1;
+                    if (flag.y > game.config.height + 100) {
+                        flag.destroy();
+                        flag.isDestroyed = true;
+                    }
+                }
+            }
+            
+            this.lives -= 1;
+        }
+    }
+
+    showLives() {
+        for (const flag of this.flags) {
+            flag.setVisible(true);
+        }
+    }
+
+    hideLives() {
+        for (const flag of this.flags) {
+            flag.setVisible(false);
+        }
+    }
+
+    setLives(amount) {
+        const difference = amount - this.lives;
+        for (let i = 0; i < Math.abs(difference); i++) {
+            if (difference > 0) {
+                this.addLife();
+            } else {
+                this.removeLife();
+            }
+        }
     }
 
     setInstructions(text) {

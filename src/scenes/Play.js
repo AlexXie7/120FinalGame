@@ -156,6 +156,10 @@ class Play extends Phaser.Scene {
 
         // open doors to map
         this.uiScene.openDoor(300);
+        this.uiScene.showLives();
+        if (!result) {
+            this.uiScene.removeLife();
+        }
         
         // reenable interactivity
         for(const zone in this.zones){
@@ -164,7 +168,7 @@ class Play extends Phaser.Scene {
         }
     }
 
-    async launchMinigame(minigameTimeLimit = 15000){
+    async launchMinigame(minigameTimeLimit = 10000){
         //something something this.zones[this.location].minigames
         // temp minigame testing
         console.log('launching minigame');
@@ -179,6 +183,7 @@ class Play extends Phaser.Scene {
         const sceneName = 'minigame' + minigameName;
 
         // wait for door to close
+        this.uiScene.hideLives();
         await this.uiScene.closeDoor(300);
         
         // launch minigame
