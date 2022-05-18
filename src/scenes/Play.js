@@ -200,7 +200,7 @@ class Play extends Phaser.Scene {
             to: 1,
             delay: 0,
             duration: 1000,
-            ease: 'Power0',
+            ease: 'Quad.easeInOut',
             hold: 0,
             //repeat: -1,
             //yoyo: true,
