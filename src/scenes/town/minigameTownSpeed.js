@@ -42,7 +42,7 @@ class minigameTownSpeed extends Minigame {
 
         // path for sign to move on
         this.signCurve = new QuadraticCurve(
-            {x: gameCenterX + this.road.displayWidth / 2, y: gameCenterY - this.road.displayHeight * .15},
+            {x: gameCenterX + this.road.displayWidth / 2, y: gameCenterY - this.road.displayHeight * .1},
             {x: gameCenterX - this.road.displayWidth * .2, y: gameCenterY - this.road.displayHeight * .2},
             {x: this.road.x - this.road.displayWidth * .8, y: game.config.height}
         )
