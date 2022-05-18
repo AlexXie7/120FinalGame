@@ -4,9 +4,16 @@ class Play extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('map', './assets/TempMap.png');
-        this.load.image('player', './assets/TempPlayer.png');
+        this.load.image('map', './assets/Map.png');
+        this.load.image('school', './assets/School.png');
+        this.load.image('town', './assets/Town.png');
+        this.load.image('plaza', './assets/Plaza.png');
+        this.load.image('home', './assets/Home.png');
+        // this.load.image('player', './assets/TempPlayer.png');
+
+        this.load.spritesheet('player', '/assets/Player.png', {frameWidth: 400, frameHeight: 800, startFrame: 0, endFrame: 3});
         this.load.audio('bgm', './assets/bgm.wav');
+
     }
 
     create() {
@@ -15,45 +22,88 @@ class Play extends Phaser.Scene {
         // Map Zones
         this.zones = {
             'school' : {
-                x: gameCenterX * 1.5,
-                y: gameCenterY / 2,
+                x: gameCenterX * 1.63,
+                y: gameCenterY*1.7,
                 minigames: minigameNames['school'],//['SchoolGum'],
-                sprite: this.add.rectangle(game.scale.width  * 3 / 4, game.scale.height * 1 / 4, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * 1.63, gameCenterY*1.18, 'school').setScale(this.map.scale*.9),
+                rotation: 0,
+                baseScale: this.map.scale*.9,
+                playing: false
                 } ,
             'home' : {
-                x: gameCenterX * 1.5,
-                y: gameCenterY * 1.5,
+                x: gameCenterX * .5,
+                y: gameCenterY * 1.7,
                 minigames: minigameNames['home'],
-                sprite: this.add.rectangle(gameCenterX*1.5, gameCenterY*1.5, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * .5, gameCenterY * 1.33, 'home').setScale(this.map.scale*.85),
+                rotation: 0,
+                baseScale: this.map.scale*.85,
+                playing: false
                 } ,
             'plaza' : {
-                x: gameCenterX / 2,
-                y: gameCenterY * 1.5,
+                x: gameCenterX * .73,
+                y: gameCenterY * .93,
                 minigames: minigameNames['plaza'],// ['PickFood'],
-                sprite: this.add.rectangle(gameCenterX/2, gameCenterY*1.5, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * .73, gameCenterY * .5, 'plaza').setScale(this.map.scale*.85),
+                rotation: 0,
+                baseScale: this.map.scale*.85,
+                playing: false
                 } ,
             'town' : {
-                x: gameCenterX / 2,
-                y: gameCenterY / 2,
+                x: gameCenterX*2,
+                y: gameCenterY*.94,
                 minigames: minigameNames['town'],
-                sprite: this.add.rectangle(gameCenterX/2, gameCenterY/2, 150, 150, 0xffffff)
+                sprite: this.add.sprite(gameCenterX * 1.57, gameCenterY * .64, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
+                rotation: 0,
+                baseScale: this.map.scale*.8,
+                playing: false
                 }
         }
 
+        //road waypoints (temporary, probably)
+        this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
+        this.centerLeft  = this.add.rectangle(gameCenterX*.88, gameCenterY*.93, 5, 5, 0x000000);
+        this.centerRight = this.add.rectangle(gameCenterX*1.17, gameCenterY*.93, 5, 5, 0x000000);
+        this.bottomMid   = this.add.rectangle(gameCenterX*1.05, gameCenterY*1.7, 5, 5, 0x0);
+        this.townRoad    = this.add.rectangle(gameCenterX*1.8, gameCenterY*.94, 5, 5, 0x000000);
+        this.plazaRoad   = this.add.rectangle(gameCenterX*.73, gameCenterY*.93, 5, 5, 0x0);
+        this.homeRoad    = this.add.rectangle(gameCenterX*.5, gameCenterY*1.7, 5, 5, 0x0);
+        this.schoolRoad  = this.add.rectangle(gameCenterX*1.63, gameCenterY*1.7, 5, 5, 0x0);
+
+
+
         for(const zone in this.zones){
-            console.log(zone);
+            console.log(this.zones[zone].sprite.scale);
+
+            // tweens
+            this.zones[zone].tween = this.tweens.add({
+                targets: this.zones[zone].sprite,
+                //ease: 'Sine.easeInOut',
+                props: {
+                    scale: {value: this.zones[zone].baseScale*1.3, duration: 2500, ease: 'Sine.easeInOut', yoyo: true, repeat: -1},
+                    angle: {from: '345', to: '375', duration: 3000, ease: 'Sine.easeInOut',clockwise: false, yoyo: true, repeat: -1}
+                },
+                //loop: 1,
+                paused: true,
+            })
+
             // interactivity for the town sprites
             this.zones[zone].sprite.setInteractive();
 
             // On hover over sprite
             this.zones[zone].sprite.on('pointerover', () => {
                 console.log('Over the ' + zone);
+                this.zones[zone].tween.play();
+
             });
 
             // On hover off sprite
             this.zones[zone].sprite.on('pointerout', () => {
                 console.log('Off the ' + zone);
+                this.zones[zone].tween.pause();
+                this.zones[zone].sprite.setScale(this.zones[zone].baseScale);
+                this.zones[zone].sprite.setAngle(0);
             });
+            
             // On click release
             // This is how we enter the minigames? 
             this.zones[zone].sprite.on('pointerup', () => {
@@ -75,7 +125,14 @@ class Play extends Phaser.Scene {
             });
         }
 
-        this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player');
+        this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player').setScale(.2);
+
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('player', {start:0, end:1, first:0}),
+            frameRate: 5,
+            repeat: -1
+        })
 
         this.isWalking = false;
         this.location = "home";
@@ -109,7 +166,7 @@ class Play extends Phaser.Scene {
     walkTo(zone){
         let walkPath = this.add.path(this.player.x, this.player.y);
         walkPath.lineTo(this.zones[zone].x, this.zones[zone].y); 
-        
+        this.player.play('walk');
         this.isWalking = true;
 
         this.player.path = walkPath;
@@ -129,6 +186,7 @@ class Play extends Phaser.Scene {
         setTimeout(() => {
             this.isWalking = false;
             this.location = zone;
+            this.player.stop(null, true);
         }, 1000);
 
 
@@ -200,5 +258,17 @@ class Play extends Phaser.Scene {
             this.minigameFinished(currentMinigame, result);
         });
     }
+
+    // checks if a world x y position is touching an object based on its texture
+    checkCollision(x, y, object) {
+        if (!object) return;
+        const key = object.texture.key;
+        const alpha = game.textures.getPixelAlpha(x - object.x + object.width * object.originX, y - object.y + object.height * object.originY, key, 0);
+        if (alpha > 127) {
+            return object;
+        }
+        return;
+    }
+    
     
 }
