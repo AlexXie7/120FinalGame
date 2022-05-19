@@ -40,17 +40,9 @@ const config = {
     scene: [Play, Minigame, UI].concat(minigameClasses), // adds minigameClasses to the scene list
 };
 
-const aspectRatio = 4 / 3;
 
-const leastLength = Math.min(window.innerWidth, window.innerHeight)
-if (window.innerWidth < window.innerHeight) {
-    config.scale.width = window.innerWidth;
-    config.scale.height = window.innerWidth / aspectRatio;
-} else {
-    config.scale.width = window.innerHeight * aspectRatio;
-    config.scale.height = window.innerHeight;
-}
-
+config.scale.width = 1200;
+config.scale.height = 900;
 const game = new Phaser.Game(config);
 
 // reserve WASD

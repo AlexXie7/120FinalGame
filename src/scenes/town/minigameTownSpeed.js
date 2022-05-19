@@ -67,7 +67,7 @@ class minigameTownSpeed extends Minigame {
         this.speed = 50;
 
         this.uiScene = this.scene.get('uiScene');
-        this.uiScene.setInstructions('Hold the pedal to accelerate');
+        this.uiScene.setInstructions('Drag down pedal to accelerate');
     }
 
     update(time, delta) {

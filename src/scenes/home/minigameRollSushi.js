@@ -17,7 +17,7 @@ class minigameRollSushi extends Minigame {
         super.create();
 
         this.uiScene = this.scene.get('uiScene');
-        this.uiScene.setInstructions('Make Sushi!');
+        this.uiScene.setInstructions('Spread Rice!');
 
         this.bg = this.add.sprite(gameCenterX, gameCenterY, 'sushiMat').setDisplaySize(game.scale.width, game.scale.height);
 
@@ -27,8 +27,8 @@ class minigameRollSushi extends Minigame {
         this.arrow = this.add.sprite(gameCenterX, gameCenterY*2, 'arrowUp').setAlpha(0).setScale(.1);
 
         //pick up the whole peanut butter and dump it on the sushi
-        this.pb = this.add.sprite(0, gameCenterY, 'pb').setInteractive();
-        this.jelly = this.add.sprite(game.scale.width, gameCenterY, 'jelly').setInteractive();
+        this.pb = this.add.sprite(0, gameCenterY, 'pb').setInteractive().setAlpha(0);
+        this.jelly = this.add.sprite(game.scale.width, gameCenterY, 'jelly').setInteractive().setAlpha(0);
         //this.jelly.x -= this.jelly.width;
 
         this.riceClicked = 1;
@@ -36,13 +36,16 @@ class minigameRollSushi extends Minigame {
         this.pbSpread = false;
         this.jellySpread = false;
 
-        this.rice.on('pointerup', () => {
+        this.rice.on('pointerdown', () => {
             if(this.riceClicked < 3){
                 this.riceClicked += 1;
                 this.rice.y -= this.nori.height/4;
                 this.rice.height += this.nori.height/4;
                 if(this.riceClicked == 3){
                     console.log("draggable");
+                    this.uiScene.setInstructions("Spread PB&J");
+                    this.pb.setAlpha(1);
+                    this.jelly.setAlpha(1);
                     this.input.setDraggable([this.pb, this.jelly]);
                 }
             }
