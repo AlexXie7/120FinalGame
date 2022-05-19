@@ -11,11 +11,24 @@ class UI extends Phaser.Scene {
         this.load.image('finishFailure', './assets/failure.png');
         this.load.image('fireworksParticle', './assets/fireworks-particle.png');
 
+        // pointers
+        this.load.spritesheet('handSheet', './assets/hand-sheet.png', {
+            frameWidth: 200, frameHeight: 200, startFrame: 0, endFrame: 2
+        });
+
+        // flag for lives
         this.load.image('flagSmall', './assets/flag-small.png');
 
-        //load sounds
+        // load sounds
         this.load.audio('soundSuccess', './assets/right.wav');
         this.load.audio('soundFailure', './assets/wrong.wav');
+        // win sound, lose sound
+        // fireworks sound,
+        // click sound? drag sound?
+        // double door sound
+        // lose life sound
+        // gain life sound?
+        // game over sound
     }
 
     create() {
@@ -93,6 +106,8 @@ class UI extends Phaser.Scene {
             0x267DFF,
             0xFFFFFF
         ];
+
+        this.hand = new Hand(this);
         
         // creates fireworks at random position multiplied by bias (determines whether its on left or right side of screen)
         const createFireworks = (bias) => {
