@@ -19,7 +19,7 @@ class minigameSchoolGum extends Minigame {
 
         // get ui scene
         this.uiScene = this.scene.get('uiScene');
-        this.uiScene.setInstructions('Get rid of your gum');
+        this.uiScene.setInstructions('Stick!');
 
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xFFFFFF).setOrigin(0);
         const bg = this.add.image(0,0,'classroom').setOrigin(0).setDepth(-2);

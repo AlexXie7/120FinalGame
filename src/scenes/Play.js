@@ -18,6 +18,16 @@ class Play extends Phaser.Scene {
 
     create() {
         this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
+       
+        //road waypoints 
+        this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
+        this.centerLeft  = this.add.rectangle(gameCenterX*.88, gameCenterY*.93, 5, 5, 0x000000);
+        this.centerRight = this.add.rectangle(gameCenterX*1.17, gameCenterY*.93, 5, 5, 0x000000);
+        this.bottomMid   = this.add.rectangle(gameCenterX*1.05, gameCenterY*1.7, 5, 5, 0x0);
+        this.townRoad    = this.add.rectangle(gameCenterX*1.8, gameCenterY*.94, 5, 5, 0x000000);
+        this.plazaRoad   = this.add.rectangle(gameCenterX*.73, gameCenterY*.93, 5, 5, 0x0);
+        this.homeRoad    = this.add.rectangle(gameCenterX*.5, gameCenterY*1.7, 5, 5, 0x0);
+        this.schoolRoad  = this.add.rectangle(gameCenterX*1.63, gameCenterY*1.7, 5, 5, 0x0);
         
         // Map Zones
         this.zones = {
@@ -28,7 +38,8 @@ class Play extends Phaser.Scene {
                 sprite: this.add.sprite(gameCenterX * 1.63, gameCenterY*1.18, 'school').setScale(this.map.scale*.9),
                 rotation: 0,
                 baseScale: this.map.scale*.9,
-                playing: false
+                playing: false,
+                pathToCenter: [this.schoolRoad, this.bottomMid, this.centerRoad]
                 } ,
             'home' : {
                 x: gameCenterX * .5,
@@ -37,7 +48,8 @@ class Play extends Phaser.Scene {
                 sprite: this.add.sprite(gameCenterX * .5, gameCenterY * 1.33, 'home').setScale(this.map.scale*.85),
                 rotation: 0,
                 baseScale: this.map.scale*.85,
-                playing: false
+                playing: false,
+                pathToCenter: [this.homeRoad, this.bottomMid, this.centerRoad]
                 } ,
             'plaza' : {
                 x: gameCenterX * .73,
@@ -46,41 +58,33 @@ class Play extends Phaser.Scene {
                 sprite: this.add.sprite(gameCenterX * .73, gameCenterY * .5, 'plaza').setScale(this.map.scale*.85),
                 rotation: 0,
                 baseScale: this.map.scale*.85,
-                playing: false
+                playing: false,
+                pathToCenter: [this.plazaRoad, this.centerLeft, this.centerRoad]
                 } ,
             'town' : {
-                x: gameCenterX*2,
+                x: gameCenterX*1.8,
                 y: gameCenterY*.94,
                 minigames: minigameNames['town'],
-                sprite: this.add.sprite(gameCenterX * 1.57, gameCenterY * .64, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
+                sprite: this.add.sprite(gameCenterX * 1.5, gameCenterY * .6, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
                 rotation: 0,
                 baseScale: this.map.scale*.8,
-                playing: false
-                }
+                playing: false,
+                pathToCenter: [this.townRoad, this.centerRight,this.centerRoad]
+            }
         }
 
-        //road waypoints (temporary, probably)
-        this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
-        this.centerLeft  = this.add.rectangle(gameCenterX*.88, gameCenterY*.93, 5, 5, 0x000000);
-        this.centerRight = this.add.rectangle(gameCenterX*1.17, gameCenterY*.93, 5, 5, 0x000000);
-        this.bottomMid   = this.add.rectangle(gameCenterX*1.05, gameCenterY*1.7, 5, 5, 0x0);
-        this.townRoad    = this.add.rectangle(gameCenterX*1.8, gameCenterY*.94, 5, 5, 0x000000);
-        this.plazaRoad   = this.add.rectangle(gameCenterX*.73, gameCenterY*.93, 5, 5, 0x0);
-        this.homeRoad    = this.add.rectangle(gameCenterX*.5, gameCenterY*1.7, 5, 5, 0x0);
-        this.schoolRoad  = this.add.rectangle(gameCenterX*1.63, gameCenterY*1.7, 5, 5, 0x0);
-
-
-
         for(const zone in this.zones){
-            console.log(this.zones[zone].sprite.scale);
-
+            console.log(this.zones[zone].sprite);
+            this.zones[zone].spriteY = this.zones[zone].sprite.y;
+            // console.log(this.zones[zone].spriteY);
             // tweens
             this.zones[zone].tween = this.tweens.add({
                 targets: this.zones[zone].sprite,
                 //ease: 'Sine.easeInOut',
                 props: {
                     scale: {value: this.zones[zone].baseScale*1.3, duration: 2500, ease: 'Sine.easeInOut', yoyo: true, repeat: -1},
-                    angle: {from: '345', to: '375', duration: 3000, ease: 'Sine.easeInOut',clockwise: false, yoyo: true, repeat: -1}
+                    angle: {from: '355', to: '365', duration: 3000, ease: 'Sine.easeInOut',clockwise: false, yoyo: true, repeat: -1},
+                    y: {value: this.zones[zone].spriteY - 50, duration:1500, ease:'Sine.easeInOut', yoyo:true, repeat: -1}
                 },
                 //loop: 1,
                 paused: true,
@@ -102,6 +106,7 @@ class Play extends Phaser.Scene {
                 this.zones[zone].tween.pause();
                 this.zones[zone].sprite.setScale(this.zones[zone].baseScale);
                 this.zones[zone].sprite.setAngle(0);
+                this.zones[zone].sprite.y = this.zones[zone].spriteY;
             });
             
             // On click release
@@ -125,7 +130,8 @@ class Play extends Phaser.Scene {
             });
         }
 
-        this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player').setScale(.2);
+        this.playerScale = this.map.scale*.2;
+        this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player').setScale(this.playerScale).setOrigin(.5, 1);
 
         this.anims.create({
             key: 'walk',
@@ -135,9 +141,9 @@ class Play extends Phaser.Scene {
         })
 
         this.isWalking = false;
-        this.location = "home";
+        this.location = null;
 
-        this.walkTo('school');
+        // this.walkTo('school');
         //this.walkToSchool();
         //console.log(this.school.sprite.x);
 
@@ -165,7 +171,38 @@ class Play extends Phaser.Scene {
 
     walkTo(zone){
         let walkPath = this.add.path(this.player.x, this.player.y);
-        walkPath.lineTo(this.zones[zone].x, this.zones[zone].y); 
+
+        console.log(this.zones[zone].pathToCenter);
+
+        let flippedPath = [...this.zones[zone].pathToCenter];
+        console.log(flippedPath);
+        flippedPath.reverse();
+
+        if (this.location == 'school' || this.location == 'town'){
+            this.player.flipX = true;
+        } else {
+            this.player.flipX = false;
+        }
+
+        if(this.location!=null){
+            for(const w of this.zones[this.location].pathToCenter){
+                console.log(w);
+                walkPath.lineTo(w.x, w.y);
+            }
+        }
+
+        if (zone != 'school' && zone != 'town'){
+            this.player.flipX = true;
+        } else {
+            this.player.flipX = false;
+        }
+
+        for(const w of flippedPath){
+            walkPath.lineTo(w.x, w.y);
+        }
+
+        console.log(walkPath);
+        // walkPath.lineTo(this.zones[zone].x, this.zones[zone].y); 
         this.player.play('walk');
         this.isWalking = true;
 
@@ -175,8 +212,9 @@ class Play extends Phaser.Scene {
             to: 1,
             delay: 0,
             duration: 1000,
-            ease: 'Power0',
+            ease: 'Quad.easeInOut',
             hold: 0,
+            //flipX: true,
             //repeat: -1,
             //yoyo: true,
             //rotateToPath: false
