@@ -97,6 +97,10 @@ class UI extends Phaser.Scene {
         this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5,0);
         this.instructions.setVisible(false);
 
+        this.hand = new Hand(this);
+        this.graphics = this.add.graphics();
+        this.arrowPaths = [];
+
         // particles for fireworks
         this.particles = this.add.particles('fireworksParticle');
         this.particles.setDepth(1);
@@ -106,8 +110,6 @@ class UI extends Phaser.Scene {
             0x267DFF,
             0xFFFFFF
         ];
-
-        this.hand = new Hand(this);
         
         // creates fireworks at random position multiplied by bias (determines whether its on left or right side of screen)
         const createFireworks = (bias) => {
@@ -195,6 +197,23 @@ class UI extends Phaser.Scene {
             this.addLife();
         }
         
+        // test arrows
+        // {
+        //     const path = new Phaser.Curves.Path(gameCenterX,gameCenterY);
+        //     path.lineTo(200,200);
+        //     path.lineTo(200,700);
+        //     path.quadraticBezierTo(800,700,500,500);
+        //     path.splineTo([600,600,600,200]);
+        //     this.addArrow(path);
+        // }
+        // {
+        //     const path = new Phaser.Curves.Path(0,0);
+        //     path.lineTo(500,800);
+        //     // path.lineTo(200,700);
+        //     path.quadraticBezierTo(1000,200,1000,900);
+        //     // path.splineTo([600,600,600,200]);
+        //     this.addArrow(path, {drawTime: 2000, color: 0xFFFF00, width: 20});
+        // }
     }
 
     update(time, delta) {
@@ -224,6 +243,19 @@ class UI extends Phaser.Scene {
                 i -= 1;
             } else {
                 flag.update(time, delta);
+            }
+        }
+
+        this.graphics.clear();
+        for (let i = 0; i < this.arrowPaths.length; i++) {
+            const path = this.arrowPaths[i];
+            if (path.isDestroyed) {
+                this.arrowPaths.splice(i, 1);
+                i -= 1;
+            } else {
+                this.drawArrow(path, {outline: true});
+                this.drawArrow(path);
+                path.update(time, delta);
             }
         }
     }
@@ -309,6 +341,180 @@ class UI extends Phaser.Scene {
 
     setInstructions(text) {
         this.instructions.setText(text);
+    }
+
+    // if options defined, overrides some properties
+    drawArrow(path, options = {}) {
+
+        const width = options.outline ? path.width + 12 : path.width;
+        const step = path.pathStep;
+        const color = options.outline ? 0x00000 : path.color;
+        const alpha = 1 - path.destroyProgress;
+        const triangleHeight = path.triangleHeight;
+        this.graphics.lineStyle(width, color, alpha);
+        this.graphics.fillStyle(color, alpha);
+
+        const pathLength = path.getLength();
+
+        let prevCurvePartial = 0;
+        for (const curve of path.curves) {
+            curve.partial = curve.getLength() / pathLength + prevCurvePartial;
+            prevCurvePartial = curve.partial;
+        }
+
+        let prevCurveLengths = 0;
+        let currPathLength = 0;
+        let testPoint = new Phaser.Math.Vector2(0,0);
+        let testPoint2 = new Phaser.Math.Vector2(0,0);
+        
+        for (let i = 0; i < path.curves.length; i++) {
+            const curve = path.curves[i];
+            const curveLength = curve.getLength();
+            if (path.progress > curve.partial || path.progress === 1) {
+                // draw full curve
+                let currLength = 0;
+                const points = [];
+                while (true) {
+                    points.push(curve.getPointAt(currLength / curveLength));
+                    currLength += step;
+                    if (currLength > curveLength) {
+                        points.push(curve.getEndPoint());
+                        break;
+                    }
+                }
+                this.graphics.strokePoints(points);
+                prevCurveLengths += curveLength;
+                currPathLength = prevCurveLengths;
+                if (i < path.curves.length - 1) {
+                    const end = points[points.length - 1];
+                    this.graphics.fillCircle(end.x, end.y, width / 2);
+                }
+            } else {
+                // draw partial curve
+                let currLength = 0;
+                const points = [];
+                points.push(curve.getStartPoint());
+                while (true) {
+                    let progress = currPathLength / pathLength;
+                    
+                    // testPoint = path.getPoint((path.progress * pathLength - triangleHeight) / pathLength);
+
+                    if (progress > path.progress) {
+
+                        // prev point should at or before the path head
+                        const prevPoint = points[points.length - 1];
+
+                        // testPoint = prevPoint;
+                        const scale = (path.progress * pathLength - currPathLength + step);
+                        const nextProgress = currLength / curveLength;
+                        // next point should be after the path head
+                        let nextPoint;
+                        if (nextProgress >= 1) {
+                            nextPoint = curve.getEndPoint();
+                        } else {
+                            nextPoint = curve.getPointAt(nextProgress);
+                        }
+                        // testPoint2 = nextPoint;
+                        const difference = nextPoint.clone().subtract(prevPoint);
+                        
+                        points.push(prevPoint.clone().add(difference.normalize().scale(scale)));
+                        
+                        break;
+                    }
+                    points.push(curve.getPointAt(currLength / curveLength))
+                    
+                    
+                    currLength += step;
+                    currPathLength += step;
+
+                }
+                // this.graphics.lineStyle(width, 0x0000FF);
+                this.graphics.strokePoints(points);
+                // debug drawing
+                // this.graphics.fillStyle(0x00FF00);
+                // this.graphics.fillPoint(testPoint.x, testPoint.y, 15);
+                // this.graphics.fillStyle(0xFFFF00);
+                // this.graphics.fillPoint(testPoint2.x, testPoint2.y, 15);
+            }
+        }
+
+        
+        
+        const triangle = new Phaser.Geom.Triangle(
+            -20, width / 2 + 20,
+            -20, -width / 2 - 20,
+            triangleHeight-20, 0
+        );
+        const head = path.getPoint(path.progress);
+        const tangent = path.getTangent(path.progress);
+        Phaser.Geom.Triangle.RotateAroundPoint(triangle, new Phaser.Geom.Point(0,0),tangent.angle());
+        Phaser.Geom.Triangle.Offset(triangle, head.x, head.y);
+        // this.graphics.fillStyle(0xFFFF00, alpha);
+        if (options.outline) {
+            this.graphics.lineStyle(12, 0x000000, alpha);
+            this.graphics.strokeTriangleShape(triangle);
+        } else {
+            this.graphics.fillTriangleShape(triangle);
+        }
+
+        // this.graphics.fillStyle(0x00000);
+        // this.graphics.fillPoint(head.x, head.y, 10);
+    }
+
+    // path: a Phaser.Curves.Path object. don't modify after
+    // options:
+    // drawTime - the time it takes for the arrow to draw
+    // lifeTime - the time the arrow stays alive before disappearing
+    // step - arrow rolution - more is smoother, but heavier
+    // color - self explanatory (doesn't change outline color)
+    // width - arrow width in pixels I think
+    addArrow(path, options = {}) {
+        path.triangleHeight = 60;
+        path.color = options.color || 0xFF0000;
+        path.width = options.width || 40;
+        path.pathStep = options.step || 50;
+        path.timer = 0;
+        path.drawTime = options.drawTime || 1000;
+        path.lifeTime = options.lifeTime || 1000;
+        path.destroyTime = options.destroyTime || 500;
+        path.progress = 0;
+        path.isFinished = false;
+        path.isDrawn = false;
+        path.state = 'draw';
+        path.destroyProgress = 0;
+        path.update = (time, delta) => {
+            if (path.isDestroyed) {
+                return;
+            }
+            if (path.state === 'finished') {
+                if (path.timer >= path.destroyTime) {
+                    path.destroyProgress = 1;
+                    path.isDestroyed = true;
+                    path.destroy();
+                } else {
+                    path.destroyProgress = path.timer / path.destroyTime;
+                }
+            } else if (path.state === 'idle') {
+                if (path.timer >= path.lifeTime) {
+                    path.timer -= path.lifeTime;
+                    path.state = 'finished';
+                    path.isFinished = true;
+                }
+            } else if (path.state === 'draw') {
+                path.progress = path.timer / path.drawTime;
+                if (path.progress >= 1) {
+                    path.timer -= path.drawTime;
+                    path.progress = 1;
+                    path.isDrawn = true;
+                    path.state = 'idle';
+                }
+            }
+            path.timer += delta;
+        }
+
+        // possibly implement a way to trim path so it fits triange??!
+
+        this.arrowPaths.push(path);
     }
 
     minigameStart() {
