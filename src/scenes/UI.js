@@ -11,11 +11,24 @@ class UI extends Phaser.Scene {
         this.load.image('finishFailure', './assets/failure.png');
         this.load.image('fireworksParticle', './assets/fireworks-particle.png');
 
+        // pointers
+        this.load.spritesheet('handSheet', './assets/hand-sheet.png', {
+            frameWidth: 200, frameHeight: 200, startFrame: 0, endFrame: 2
+        });
+
+        // flag for lives
         this.load.image('flagSmall', './assets/flag-small.png');
 
-        //load sounds
+        // load sounds
         this.load.audio('soundSuccess', './assets/right.wav');
         this.load.audio('soundFailure', './assets/wrong.wav');
+        // win sound, lose sound
+        // fireworks sound,
+        // click sound? drag sound?
+        // double door sound
+        // lose life sound
+        // gain life sound?
+        // game over sound
     }
 
     create() {
@@ -72,17 +85,102 @@ class UI extends Phaser.Scene {
             }
         }
 
+        
         // active signs that are getting updated (o and x and other stuff possibly);
         this.activeSigns = [];  
 
+        // overlay over the game for effect
+        this.overlay = this.add.rectangle(0,0,game.config.width, game.config.height, 0x000000, 1).setOrigin(0);
+        const ov = this.overlay;
+        ov.setAlpha(0);
+        ov.timer = 0;
+        ov.duration = 0;
+        ov.state = 'none';
+        ov.update = (time, delta) => {
+            if (ov.state === 'transform') {
+                let progress = ov.timer / ov.duration;
+                if (progress >= 1) {
+                    progress = 1;
+                    ov.state = 'none';
+                    ov.setAlpha(ov.targetAlpha);
+                    return;
+                }
+                ov.setAlpha(ov.startAlpha + progress * (ov.targetAlpha - ov.startAlpha));
+
+                ov.timer += delta;
+            }
+        }
+        ov.moveAlpha = (alpha, duration = 200) => {
+            ov.targetAlpha = alpha;
+            ov.startAlpha = ov.alpha;
+            ov.duration = duration;
+            ov.timer = 0;
+            ov.state = 'transform';
+        }
+
         // instructions at the top
         const instructionsConfig = {
+            align: 'center',
             fontSize: '64px',
             stroke: '#000',
             strokeThickness: 4
         }
-        this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5,0);
-        this.instructions.setVisible(false);
+        this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5);
+        const ins = this.instructions;
+        ins.setFontSize(64);
+        ins.fontSize = 64;
+        ins.setVisible(false);
+        ins.setWordWrapWidth(game.config.width);
+        ins.state = 'idle';
+        ins.progress = 0;
+        ins.timer = 0;
+        ins.update = (time, delta) => {
+            if (ins.state === 'transform') {
+                // transform to target
+                ins.progress = ins.timer / ins.duration;
+                if (ins.progress >= 1) {
+                    ins.progress = 1;
+                    if (ins.finishCallback) {
+                        ins.finishCallback();
+                    }
+                    ins.state = 'idle';
+                }
+                ins.setPosition(
+                    ins.startX + ins.progress * (ins.targetX - ins.startX),
+                    ins.startY + ins.progress * (ins.targetY - ins.startY)
+                );
+                ins.setScale(
+                    ins.startScaleX + ins.progress * (ins.targetScaleX - ins.startScaleX),
+                    ins.startScaleY + ins.progress * (ins.targetScaleY - ins.startScaleY)
+                );
+                ins.fontSize = ins.startFontSize + ins.progress * (ins.targetFontSize - ins.startFontSize);
+                ins.setFontSize(ins.fontSize);
+
+                ins.timer += delta;
+            }
+        }
+        ins.transform = (options = {}) => {
+            ins.finishCallback = options.callback;
+            ins.targetX = options.x !== undefined ? options.x : ins.x;
+            ins.targetY = options.y !== undefined ? options.y : ins.y;
+            ins.targetScaleX = options.scale !== undefined ? options.scale : (options.scaleX !== undefined ? options.scaleX : ins.scaleX);
+            ins.targetScaleY = options.scale !== undefined ? options.scale : (options.scaleY !== undefined ? options.scaleY : ins.scaleY);
+            ins.targetFontSize = options.fontSize || 64;
+            ins.duration = options.duration || 200;
+            ins.startX = ins.x;
+            ins.startY = ins.y;
+            ins.startScaleX = ins.scaleX;
+            ins.startScaleY = ins.scaleY;
+            ins.startFontSize = ins.fontSize;
+            ins.timer = 0;
+            ins.state = 'transform';
+        }
+        
+
+        // this.hand = new Hand(this); // hand test
+        this.activeHands = [];
+        this.graphics = this.add.graphics();
+        this.arrowPaths = [];
 
         // particles for fireworks
         this.particles = this.add.particles('fireworksParticle');
@@ -180,18 +278,39 @@ class UI extends Phaser.Scene {
             this.addLife();
         }
         
+        // test arrows
+        // {
+        //     const path = new Phaser.Curves.Path(gameCenterX,gameCenterY);
+        //     path.lineTo(200,200);
+        //     path.lineTo(200,700);
+        //     path.quadraticBezierTo(800,700,500,500);
+        //     path.splineTo([600,600,600,200]);
+        //     this.addArrow(path);
+        // }
+        // {
+        //     const path = new Phaser.Curves.Path(0,0);
+        //     path.lineTo(500,800);
+        //     // path.lineTo(200,700);
+        //     path.quadraticBezierTo(1000,200,1000,900);
+        //     // path.splineTo([600,600,600,200]);
+        //     this.addArrow(path, {drawTime: 2000, color: 0xFFFF00, width: 20});
+        // }
     }
 
     update(time, delta) {
 
+        // update main signs
         this.finishSuccess.update(time, delta);
         this.finishFailure.update(time, delta);
+        this.instructions.update(time, delta);
+        this.overlay.update(time, delta);
 
+        // update doors (plaza)
         for (const door of this.plazaDoors) {
             door.update(time, delta);
         }
 
-
+        // update signs (o, x, and other words)
         for (let i = 0; i < this.activeSigns.length; i++) {
             const sign = this.activeSigns[i];
             if (sign.isDestroyed) {
@@ -202,6 +321,7 @@ class UI extends Phaser.Scene {
             }
         }
 
+        // update flags
         for (let i = 0; i < this.removedFlags.length; i++) {
             const flag = this.removedFlags[i];
             if (flag.isDestroyed) {
@@ -209,6 +329,31 @@ class UI extends Phaser.Scene {
                 i -= 1;
             } else {
                 flag.update(time, delta);
+            }
+        }
+
+        // update hands
+        for (let i = 0; i < this.activeHands.length; i++) {
+            const hand = this.activeHands[i];
+            if (hand.isDestroyed) {
+                this.activeHands.splice(i, 1);
+                i -= 1;
+            } else {
+                hand.update(time, delta);
+            }
+        }
+
+        // update arrows
+        this.graphics.clear();
+        for (let i = 0; i < this.arrowPaths.length; i++) {
+            const path = this.arrowPaths[i];
+            if (path.isDestroyed) {
+                this.arrowPaths.splice(i, 1);
+                i -= 1;
+            } else {
+                this.drawArrow(path, {outline: true});
+                this.drawArrow(path);
+                path.update(time, delta);
             }
         }
     }
@@ -296,14 +441,249 @@ class UI extends Phaser.Scene {
         this.instructions.setText(text);
     }
 
-    minigameStart() {
+    // if options defined, overrides some properties
+    drawArrow(path, options = {}) {
+
+        if (path.state === 'delay') {
+            return;
+        }
+
+        const width = options.outline ? path.width + 12 : path.width;
+        const step = path.pathStep;
+        const color = options.outline ? 0x00000 : path.color;
+        const alpha = 1 - path.destroyProgress;
+        const triangleHeight = path.triangleHeight;
+        if (path.hand) {
+            path.hand.setAlpha(alpha);
+        }
+        this.graphics.lineStyle(width, color, alpha);
+        this.graphics.fillStyle(color, alpha);
+
+        const pathLength = path.getLength();
+
+        let prevCurvePartial = 0;
+        for (const curve of path.curves) {
+            curve.partial = curve.getLength() / pathLength + prevCurvePartial;
+            prevCurvePartial = curve.partial;
+        }
+
+        let prevCurveLengths = 0;
+        let currPathLength = 0;
+        let testPoint = new Phaser.Math.Vector2(0,0);
+        let testPoint2 = new Phaser.Math.Vector2(0,0);
+        
+        for (let i = 0; i < path.curves.length; i++) {
+            const curve = path.curves[i];
+            const curveLength = curve.getLength();
+            if (path.progress > curve.partial || path.progress === 1) {
+                // draw full curve
+                let currLength = 0;
+                const points = [];
+                while (true) {
+                    points.push(curve.getPointAt(currLength / curveLength));
+                    currLength += step;
+                    if (currLength > curveLength) {
+                        points.push(curve.getEndPoint());
+                        break;
+                    }
+                }
+                this.graphics.strokePoints(points);
+                prevCurveLengths += curveLength;
+                currPathLength = prevCurveLengths;
+                if (i < path.curves.length - 1) {
+                    const end = points[points.length - 1];
+                    this.graphics.fillCircle(end.x, end.y, width / 2);
+                }
+            } else {
+                // draw partial curve
+                let currLength = 0;
+                const points = [];
+                points.push(curve.getStartPoint());
+                while (true) {
+                    let progress = currPathLength / pathLength;
+                    
+                    // testPoint = path.getPoint((path.progress * pathLength - triangleHeight) / pathLength);
+
+                    if (progress > path.progress) {
+
+                        // prev point should at or before the path head
+                        const prevPoint = points[points.length - 1];
+
+                        // testPoint = prevPoint;
+                        const scale = (path.progress * pathLength - currPathLength + step);
+                        const nextProgress = currLength / curveLength;
+                        // next point should be after the path head
+                        let nextPoint;
+                        if (nextProgress >= 1) {
+                            nextPoint = curve.getEndPoint();
+                        } else {
+                            nextPoint = curve.getPointAt(nextProgress);
+                        }
+                        // testPoint2 = nextPoint;
+                        const difference = nextPoint.clone().subtract(prevPoint);
+                        
+                        points.push(prevPoint.clone().add(difference.normalize().scale(scale)));
+                        
+                        break;
+                    }
+                    points.push(curve.getPointAt(currLength / curveLength))
+                    
+                    
+                    currLength += step;
+                    currPathLength += step;
+
+                }
+                // this.graphics.lineStyle(width, 0x0000FF);
+                this.graphics.strokePoints(points);
+                // debug drawing
+                // this.graphics.fillStyle(0x00FF00);
+                // this.graphics.fillPoint(testPoint.x, testPoint.y, 15);
+                // this.graphics.fillStyle(0xFFFF00);
+                // this.graphics.fillPoint(testPoint2.x, testPoint2.y, 15);
+            }
+        }
+
+        
+        
+        const triangle = new Phaser.Geom.Triangle(
+            -20, width / 2 + 20,
+            -20, -width / 2 - 20,
+            triangleHeight-20, 0
+        );
+        const head = path.head; //getPoint(path.progress);
+        const tangent = path.getTangent(path.progress);
+        Phaser.Geom.Triangle.RotateAroundPoint(triangle, new Phaser.Geom.Point(0,0),tangent.angle());
+        Phaser.Geom.Triangle.Offset(triangle, head.x, head.y);
+        // this.graphics.fillStyle(0xFFFF00, alpha);
+        if (options.outline) {
+            this.graphics.lineStyle(12, 0x000000, alpha);
+            this.graphics.strokeTriangleShape(triangle);
+        } else {
+            this.graphics.fillTriangleShape(triangle);
+        }
+
+        // this.graphics.fillStyle(0x00000);
+        // this.graphics.fillPoint(head.x, head.y, 10);
+    }
+
+    // path: a Phaser.Curves.Path object. don't modify after
+    // options:
+    // drawTime - the time it takes for the arrow to draw
+    // lifeTime - the time the arrow stays alive before disappearing
+    // step - arrow rolution - more is smoother, but heavier
+    // color - self explanatory (doesn't change outline color)
+    // width - arrow width in pixels I think
+    addArrow(path, options = {}) {
+        path.triangleHeight = 60;
+        path.color = options.color || 0xFF0000;
+        path.width = options.width || 40;
+        path.pathStep = options.step || 50;
+        path.delay = options.delay || 0;
+        path.timer = 0;
+        path.drawTime = options.drawTime || 1000;
+        path.lifeTime = options.lifeTime || 1000;
+        path.destroyTime = options.destroyTime || 500;
+        path.head = new Phaser.Math.Vector2(path.startPoint.x, path.startPoint.y);
+        if (options.attachHand) {
+            path.hand = new Hand(this, {reference: path.head});
+            path.hand.setAlpha(0);
+        }
+        path.progress = 0;
+        path.isFinished = false;
+        path.isDrawn = false;
+        if (path.delay > 0) {
+            path.state = 'delay';
+            new Timer().start(path.delay, () => {path.state = 'draw'});
+        } else {
+            path.state = 'draw';
+        }
+        path.destroyProgress = 0;
+        path.update = (time, delta) => {
+            if (path.isDestroyed) {
+                return;
+            }
+            if (path.state === 'finished') {
+                if (path.timer >= path.destroyTime) {
+                    path.destroyProgress = 1;
+                    path.isDestroyed = true;
+                    path.destroy();
+                    if (path.hand) {
+                        path.hand.destroy();
+                    }
+                } else {
+                    path.destroyProgress = path.timer / path.destroyTime;
+                }
+            } else if (path.state === 'idle') {
+                if (path.timer >= path.lifeTime) {
+                    path.timer -= path.lifeTime;
+                    path.state = 'finished';
+                    path.isFinished = true;
+                }
+            } else if (path.state === 'draw') {
+                path.progress = path.timer / path.drawTime;
+                if (path.progress >= 1) {
+                    path.timer -= path.drawTime;
+                    path.progress = 1;
+                    path.isDrawn = true;
+                    path.state = 'idle';
+                }
+                path.head.copy(path.getPoint(path.progress));
+            }
+            if (path.state !== 'delay') {
+                path.timer += delta;
+            }
+        }
+
+        // possibly implement a way to trim path so it fits triange??!
+
+        this.arrowPaths.push(path);
+    }
+
+    clearArrows() {
+        for (const path of this.arrowPaths) {
+            path.isDestroyed = true;
+            path.destroy();
+        }
+    }
+
+    async minigameStart() {
+        const instructionVisibleDuration = 1000;
         this.instructions.setVisible(true);
+        // this.overlay.setAlpha(.5);
+        // console.log(this.overlay.alpha);
+        this.overlay.moveAlpha(.5, 200);
+        await new Promise((resolve, reject) => {
+            this.instructions.transform({
+                x: gameCenterX,
+                y: gameCenterY,
+                // scale: 1.5,
+                fontSize: 80,
+                callback: resolve
+            });
+        });
+        await new Promise((resolve, reject) => {
+            new Timer().start(instructionVisibleDuration, resolve);
+        });
+        this.overlay.moveAlpha(0, 200);
+        await new Promise((resolve, reject) => {
+            this.instructions.transform({
+                x: gameCenterX,
+                y: 32,
+                // scale: 1,
+                fontSize: 64,
+                callback: resolve
+            });
+        });
+        // console.log(this.overlay.alpha);
         this.timerBar.setVisible(true);
+
+        return;
     }
 
     minigameEnd(result) {
         this.instructions.setVisible(false);
         this.timerBar.setVisible(false);
+        this.clearArrows();
 
         if (result) {
             this.finishSuccess.show();
