@@ -22,10 +22,13 @@ class Hand extends Phaser.GameObjects.Sprite {
     constructor(scene, options = {}) {
         super(scene, options.x || gameCenterX, options.y || gameCenterY, 'handSheet', options.frame || 0);
         scene.add.existing(this);
+        scene.activeHands.push(this);
+        this.setDepth(options.depth || 0);
         this.setReference(options.reference);
         this.offsetX = 0;
         this.offsetY = 0;
         this.setState(Hand.states.POINTER);
+        this.isDestroyed = false;
     }
 
     update(time, delta) {
@@ -86,5 +89,10 @@ class Hand extends Phaser.GameObjects.Sprite {
         }
         this.state = newState;
         return this;
+    }
+
+    destroy() {
+        super.destroy();
+        this.isDestroyed = true;
     }
 }

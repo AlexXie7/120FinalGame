@@ -85,19 +85,100 @@ class UI extends Phaser.Scene {
             }
         }
 
+        
         // active signs that are getting updated (o and x and other stuff possibly);
         this.activeSigns = [];  
 
+        // overlay over the game for effect
+        this.overlay = this.add.rectangle(0,0,game.config.width, game.config.height, 0x000000, 1).setOrigin(0);
+        const ov = this.overlay;
+        ov.setAlpha(0);
+        ov.timer = 0;
+        ov.duration = 0;
+        ov.state = 'none';
+        ov.update = (time, delta) => {
+            if (ov.state === 'transform') {
+                let progress = ov.timer / ov.duration;
+                if (progress >= 1) {
+                    progress = 1;
+                    ov.state = 'none';
+                    ov.setAlpha(ov.targetAlpha);
+                    return;
+                }
+                ov.setAlpha(ov.startAlpha + progress * (ov.targetAlpha - ov.startAlpha));
+
+                ov.timer += delta;
+            }
+        }
+        ov.moveAlpha = (alpha, duration = 200) => {
+            ov.targetAlpha = alpha;
+            ov.startAlpha = ov.alpha;
+            ov.duration = duration;
+            ov.timer = 0;
+            ov.state = 'transform';
+        }
+
         // instructions at the top
         const instructionsConfig = {
+            align: 'center',
             fontSize: '64px',
             stroke: '#000',
             strokeThickness: 4
         }
-        this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5,0);
-        this.instructions.setVisible(false);
+        this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5);
+        const ins = this.instructions;
+        ins.setFontSize(64);
+        ins.fontSize = 64;
+        ins.setVisible(false);
+        ins.setWordWrapWidth(game.config.width);
+        ins.state = 'idle';
+        ins.progress = 0;
+        ins.timer = 0;
+        ins.update = (time, delta) => {
+            if (ins.state === 'transform') {
+                // transform to target
+                ins.progress = ins.timer / ins.duration;
+                if (ins.progress >= 1) {
+                    ins.progress = 1;
+                    if (ins.finishCallback) {
+                        ins.finishCallback();
+                    }
+                    ins.state = 'idle';
+                }
+                ins.setPosition(
+                    ins.startX + ins.progress * (ins.targetX - ins.startX),
+                    ins.startY + ins.progress * (ins.targetY - ins.startY)
+                );
+                ins.setScale(
+                    ins.startScaleX + ins.progress * (ins.targetScaleX - ins.startScaleX),
+                    ins.startScaleY + ins.progress * (ins.targetScaleY - ins.startScaleY)
+                );
+                ins.fontSize = ins.startFontSize + ins.progress * (ins.targetFontSize - ins.startFontSize);
+                ins.setFontSize(ins.fontSize);
 
-        this.hand = new Hand(this);
+                ins.timer += delta;
+            }
+        }
+        ins.transform = (options = {}) => {
+            ins.finishCallback = options.callback;
+            ins.targetX = options.x !== undefined ? options.x : ins.x;
+            ins.targetY = options.y !== undefined ? options.y : ins.y;
+            ins.targetScaleX = options.scale !== undefined ? options.scale : (options.scaleX !== undefined ? options.scaleX : ins.scaleX);
+            ins.targetScaleY = options.scale !== undefined ? options.scale : (options.scaleY !== undefined ? options.scaleY : ins.scaleY);
+            ins.targetFontSize = options.fontSize || 64;
+            ins.duration = options.duration || 200;
+            ins.startX = ins.x;
+            ins.startY = ins.y;
+            ins.startScaleX = ins.scaleX;
+            ins.startScaleY = ins.scaleY;
+            ins.startFontSize = ins.fontSize;
+            ins.timer = 0;
+            ins.state = 'transform';
+        }
+        
+
+        // this.hand = new Hand(this); // hand test
+        this.activeHands = [];
         this.graphics = this.add.graphics();
         this.arrowPaths = [];
 
@@ -218,14 +299,18 @@ class UI extends Phaser.Scene {
 
     update(time, delta) {
 
+        // update main signs
         this.finishSuccess.update(time, delta);
         this.finishFailure.update(time, delta);
+        this.instructions.update(time, delta);
+        this.overlay.update(time, delta);
 
+        // update doors (plaza)
         for (const door of this.plazaDoors) {
             door.update(time, delta);
         }
 
-
+        // update signs (o, x, and other words)
         for (let i = 0; i < this.activeSigns.length; i++) {
             const sign = this.activeSigns[i];
             if (sign.isDestroyed) {
@@ -236,6 +321,7 @@ class UI extends Phaser.Scene {
             }
         }
 
+        // update flags
         for (let i = 0; i < this.removedFlags.length; i++) {
             const flag = this.removedFlags[i];
             if (flag.isDestroyed) {
@@ -246,6 +332,18 @@ class UI extends Phaser.Scene {
             }
         }
 
+        // update hands
+        for (let i = 0; i < this.activeHands.length; i++) {
+            const hand = this.activeHands[i];
+            if (hand.isDestroyed) {
+                this.activeHands.splice(i, 1);
+                i -= 1;
+            } else {
+                hand.update(time, delta);
+            }
+        }
+
+        // update arrows
         this.graphics.clear();
         for (let i = 0; i < this.arrowPaths.length; i++) {
             const path = this.arrowPaths[i];
@@ -346,11 +444,18 @@ class UI extends Phaser.Scene {
     // if options defined, overrides some properties
     drawArrow(path, options = {}) {
 
+        if (path.state === 'delay') {
+            return;
+        }
+
         const width = options.outline ? path.width + 12 : path.width;
         const step = path.pathStep;
         const color = options.outline ? 0x00000 : path.color;
         const alpha = 1 - path.destroyProgress;
         const triangleHeight = path.triangleHeight;
+        if (path.hand) {
+            path.hand.setAlpha(alpha);
+        }
         this.graphics.lineStyle(width, color, alpha);
         this.graphics.fillStyle(color, alpha);
 
@@ -445,7 +550,7 @@ class UI extends Phaser.Scene {
             -20, -width / 2 - 20,
             triangleHeight-20, 0
         );
-        const head = path.getPoint(path.progress);
+        const head = path.head; //getPoint(path.progress);
         const tangent = path.getTangent(path.progress);
         Phaser.Geom.Triangle.RotateAroundPoint(triangle, new Phaser.Geom.Point(0,0),tangent.angle());
         Phaser.Geom.Triangle.Offset(triangle, head.x, head.y);
@@ -473,14 +578,25 @@ class UI extends Phaser.Scene {
         path.color = options.color || 0xFF0000;
         path.width = options.width || 40;
         path.pathStep = options.step || 50;
+        path.delay = options.delay || 0;
         path.timer = 0;
         path.drawTime = options.drawTime || 1000;
         path.lifeTime = options.lifeTime || 1000;
         path.destroyTime = options.destroyTime || 500;
+        path.head = new Phaser.Math.Vector2(path.startPoint.x, path.startPoint.y);
+        if (options.attachHand) {
+            path.hand = new Hand(this, {reference: path.head});
+            path.hand.setAlpha(0);
+        }
         path.progress = 0;
         path.isFinished = false;
         path.isDrawn = false;
-        path.state = 'draw';
+        if (path.delay > 0) {
+            path.state = 'delay';
+            new Timer().start(path.delay, () => {path.state = 'draw'});
+        } else {
+            path.state = 'draw';
+        }
         path.destroyProgress = 0;
         path.update = (time, delta) => {
             if (path.isDestroyed) {
@@ -491,6 +607,9 @@ class UI extends Phaser.Scene {
                     path.destroyProgress = 1;
                     path.isDestroyed = true;
                     path.destroy();
+                    if (path.hand) {
+                        path.hand.destroy();
+                    }
                 } else {
                     path.destroyProgress = path.timer / path.destroyTime;
                 }
@@ -508,8 +627,11 @@ class UI extends Phaser.Scene {
                     path.isDrawn = true;
                     path.state = 'idle';
                 }
+                path.head.copy(path.getPoint(path.progress));
             }
-            path.timer += delta;
+            if (path.state !== 'delay') {
+                path.timer += delta;
+            }
         }
 
         // possibly implement a way to trim path so it fits triange??!
@@ -517,14 +639,51 @@ class UI extends Phaser.Scene {
         this.arrowPaths.push(path);
     }
 
-    minigameStart() {
+    clearArrows() {
+        for (const path of this.arrowPaths) {
+            path.isDestroyed = true;
+            path.destroy();
+        }
+    }
+
+    async minigameStart() {
+        const instructionVisibleDuration = 1000;
         this.instructions.setVisible(true);
+        // this.overlay.setAlpha(.5);
+        // console.log(this.overlay.alpha);
+        this.overlay.moveAlpha(.5, 200);
+        await new Promise((resolve, reject) => {
+            this.instructions.transform({
+                x: gameCenterX,
+                y: gameCenterY,
+                // scale: 1.5,
+                fontSize: 80,
+                callback: resolve
+            });
+        });
+        await new Promise((resolve, reject) => {
+            new Timer().start(instructionVisibleDuration, resolve);
+        });
+        this.overlay.moveAlpha(0, 200);
+        await new Promise((resolve, reject) => {
+            this.instructions.transform({
+                x: gameCenterX,
+                y: 32,
+                // scale: 1,
+                fontSize: 64,
+                callback: resolve
+            });
+        });
+        // console.log(this.overlay.alpha);
         this.timerBar.setVisible(true);
+
+        return;
     }
 
     minigameEnd(result) {
         this.instructions.setVisible(false);
         this.timerBar.setVisible(false);
+        this.clearArrows();
 
         if (result) {
             this.finishSuccess.show();

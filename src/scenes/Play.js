@@ -237,6 +237,10 @@ class Play extends Phaser.Scene {
         this.minigameTimer.stop();
         console.log('finished - closing minigame - minigame result:', result);
 
+        // pause minigame perhaps?
+        this.scene.pause(scene);
+
+        this.uiScene.overlay.moveAlpha(.5);
         this.uiScene.minigameEnd(result);
         
         // wait a little before closing door
@@ -246,6 +250,7 @@ class Play extends Phaser.Scene {
 
         // wait for door close
         await this.uiScene.closeDoor(300);
+        this.uiScene.overlay.setAlpha(0);
 
         // stop the minigame scene
         this.scene.stop(scene);
@@ -259,8 +264,7 @@ class Play extends Phaser.Scene {
         
         // reenable interactivity
         for(const zone in this.zones){
-            this.zones[zone].sprite.setInteractive();     
-            console.log(zone);       
+            this.zones[zone].sprite.setInteractive();
         }
     }
 
@@ -268,6 +272,7 @@ class Play extends Phaser.Scene {
         //something something this.zones[this.location].minigames
         // temp minigame testing
         console.log('launching minigame');
+        // console.log('manager booted', game.scene.isBooted);
         
         //picks a random minigame from the minigame list
         let minigameName = this.zones[this.location].minigames[Math.floor(Math.random()*this.zones[this.location].minigames.length)];
@@ -281,7 +286,13 @@ class Play extends Phaser.Scene {
         // wait for door to close
         this.uiScene.hideLives();
         await this.uiScene.closeDoor(300);
-        
+
+        // get the minigame scene and check for the create event
+        const currentMinigame = this.scene.get(sceneName);
+        currentMinigame.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
+            this.scene.pause(sceneName);
+        })
+
         // launch minigame
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
@@ -291,9 +302,10 @@ class Play extends Phaser.Scene {
         await this.uiScene.openDoor(300);
 
         // then start minigame and timers
-        this.uiScene.minigameStart();
+        await this.uiScene.minigameStart();
+        this.scene.resume(sceneName);
 
-        const currentMinigame = this.scene.get(sceneName);
+        
 
         this.minigameTimer.start(minigameTimeLimit, () => {
             const result = currentMinigame.timeout();
