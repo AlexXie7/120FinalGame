@@ -14,9 +14,12 @@ class Minigame extends Phaser.Scene {
 
     create() {
         this.playScene = this.scene.get('playScene'); // reference to the play scene
+        this.uiScene = this.scene.get('uiScene');
         this.isFinished = false; // set when the minigame is finished
         this.isPassed = false; // set when the minigame is passed, else it means it is a failure
         this.finishCalled = false;
+        this.pauseOnFinish = true; // set to false in create if you want minigame to keep updating after finish
+        // perhaps for an ending animation
         
         // test minigame code
         // this.add.rectangle(20, 20, game.config.width - 40, game.config.height - 40, '#FCF');
@@ -39,6 +42,9 @@ class Minigame extends Phaser.Scene {
 
     // called by any subclass minigame when the minigame is completed before time limit
     finish(result) {
+        // prevent finishing multiple times
+        // such as if the timer is out, minigame is not paused, and a finish is triggered
+        // or if a finish condition is met, but repeatedly called such as in update
         if (this.finishCalled) {
             return;
         }
