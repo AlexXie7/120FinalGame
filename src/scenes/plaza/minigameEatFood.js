@@ -38,13 +38,17 @@ class minigameEatFood extends Minigame {
         // utensils
         this.fork = this.add.image(gameCenterX + 230 * this.scale, gameCenterY + 50 * this.scale, 'fork').setOrigin(.5).setScale(this.scale);
         this.initDraggable(this.fork);
+        this.fork.isCorrect = true;
         this.chopsticks = this.add.image(gameCenterX - 230 * this.scale, gameCenterY + 50 * this.scale, 'chopsticks').setOrigin(.5).setScale(this.scale);
         this.initDraggable(this.chopsticks);
+        this.chopsticks.isCorrect = false;
         
         this.activePoint;
         this.eatTimer = 0;
 
         this.uiScene.setInstructions('Eat some food');
+
+        this.score = 0;
     }
 
     update(time, delta) {
@@ -69,9 +73,8 @@ class minigameEatFood extends Minigame {
         }
         this.jaw.targetY = this.head.y + jawOffset;
         
-        //(Math.sin(time * .02) * .5 + 1) * 
 
-        this.jaw.y += (this.jaw.targetY - this.jaw.y) * delta * .006;
+        this.jaw.y += (this.jaw.targetY - this.jaw.y) * delta * .01;
 
         this.fork.update(time, delta);
         this.chopsticks.update(time, delta);
@@ -116,6 +119,17 @@ class minigameEatFood extends Minigame {
                     object.food.consume();
                     this.eatTimer = 2000;
                     object.food = undefined;
+
+                    if (object.isCorrect) {
+                        this.score += 1;
+                        if (this.score >= 3) {
+                            this.finish(true); // consider finish early?
+                        }
+                    } else {
+                        // consider not subtracting score
+                        // this.score -= 1;
+                        this.uiScene.createFailure(this.mouthPoint.x, this.mouthPoint.y);
+                    }
                 }
             }
             

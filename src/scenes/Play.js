@@ -237,8 +237,10 @@ class Play extends Phaser.Scene {
         this.minigameTimer.stop();
         console.log('finished - closing minigame - minigame result:', result);
 
-        // pause minigame perhaps?
-        this.scene.pause(scene);
+        // pause minigame if minigame permits it
+        if (scene.pauseOnFinish) {
+            this.scene.pause(scene);
+        }
 
         this.uiScene.overlay.moveAlpha(.5);
         this.uiScene.minigameEnd(result);
