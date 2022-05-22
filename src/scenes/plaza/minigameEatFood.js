@@ -27,6 +27,7 @@ class minigameEatFood extends Minigame {
         // head stuff
         this.head = this.add.image(gameCenterX, gameCenterY - 200 * this.scale, 'head').setOrigin(.5).setScale(this.scale);
         this.jaw = this.add.image(this.head.x, this.head.y, 'jaw').setOrigin(.5).setScale(this.scale);
+        this.mouthPoint = new Phaser.Math.Vector2(this.head.x, this.head.y + 140 * this.scale);
         
         // food/bowl stuff
         this.food = this.add.image(gameCenterX, gameCenterY + 100 * this.scale, 'noodles').setOrigin(.5).setScale(this.scale);
@@ -37,29 +38,43 @@ class minigameEatFood extends Minigame {
         // utensils
         this.fork = this.add.image(gameCenterX + 230 * this.scale, gameCenterY + 50 * this.scale, 'fork').setOrigin(.5).setScale(this.scale);
         this.initDraggable(this.fork);
+        this.chopsticks = this.add.image(gameCenterX - 230 * this.scale, gameCenterY + 50 * this.scale, 'chopsticks').setOrigin(.5).setScale(this.scale);
+        this.initDraggable(this.chopsticks);
         
         this.activePoint;
+        this.eatTimer = 0;
+
+        this.uiScene.setInstructions('Eat some food');
     }
 
     update(time, delta) {
 
         // const pointer = game.input.activePointer;
+        let overrideEat = false;
+        let jawOffset = 0;
+        const maxJaw = 60;
         if (this.activePoint) {
             // distance of active point to mouth
-            const distance = Phaser.Math.Distance.Between(this.activePoint.x, this.activePoint.y, this.head.x, this.head.y + 150 * this.scale);
+            const distance = Phaser.Math.Distance.Between(this.activePoint.x, this.activePoint.y, this.mouthPoint.x, this.mouthPoint.y);
             const maxDistance = 100;
-            const maxJaw = 60;
-            const jawOffset = this.scale * (Math.pow(Math.max(maxDistance - distance, 0) / maxDistance, .5)) * maxJaw;
-            this.jaw.targetY = this.head.y + jawOffset;
+            jawOffset = this.scale * (Math.pow(Math.max(maxDistance - distance, 0) / maxDistance, .5)) * maxJaw;
         } else {
-            this.jaw.targetY = this.head.y;
+            jawOffset = 0;
         }
+
+        if (this.eatTimer > 0) {
+            const eatOffset = (Math.sin(time * .02)) * maxJaw * this.scale;
+            jawOffset = Math.max(jawOffset, eatOffset);
+            this.eatTimer -= delta;
+        }
+        this.jaw.targetY = this.head.y + jawOffset;
         
         //(Math.sin(time * .02) * .5 + 1) * 
 
         this.jaw.y += (this.jaw.targetY - this.jaw.y) * delta * .006;
 
         this.fork.update(time, delta);
+        this.chopsticks.update(time, delta);
     }
 
     initDraggable(object) {
@@ -94,6 +109,14 @@ class minigameEatFood extends Minigame {
             if (object.food) {
                 object.food.x = point.x;
                 object.food.y = point.y;
+                // const distance = Phaser.Math.Distance.Between(object.food.x, object.food.y, this.mouthPoint.x, this.mouthPoint.y);
+                const distanceX = Math.abs(object.food.x - this.mouthPoint.x);
+                const distanceY = Math.abs(object.food.y - this.mouthPoint.y);
+                if (distanceX < 40 * this.scale && distanceY < 15 * this.scale) {
+                    object.food.consume();
+                    this.eatTimer = 2000;
+                    object.food = undefined;
+                }
             }
             
         }
@@ -101,6 +124,16 @@ class minigameEatFood extends Minigame {
 
     createFoodClump(x, y) {
         const clump = this.add.image(x, y, 'noodleClump').setOrigin(.5).setScale(this.scale);
+        clump.isFree = false;
+        // to add: array of clumps to update in create, destroying, etc
+        clump.update = (time, delta) => {
+            // clump will fall when utensil returned
+            // clump has trailing food (like noodle) probably drawn with graphics and chain physics?
+        }
+        clump.consume = () => {
+            clump.destroy();
+            clump.isDestroyed = true;
+        }
         return clump;
     }
 
