@@ -11,8 +11,10 @@ class Play extends Phaser.Scene {
         this.load.image('home', './assets/Home.png');
         // this.load.image('player', './assets/TempPlayer.png');
 
-        this.load.spritesheet('player', '/assets/Player.png', {frameWidth: 400, frameHeight: 800, startFrame: 0, endFrame: 3});
-        this.load.audio('bgm', './assets/bgm.wav');
+        this.load.spritesheet('player', './assets/Player.png', {frameWidth: 400, frameHeight: 800, startFrame: 0, endFrame: 3});
+        // this.load.audio('bgm', './assets/bgm.wav');
+        this.load.audio('bgmOriginal', './assets/bgm-original.mp3');
+        this.load.audio('bgmAsian', './assets/bgm-asian.mp3');
 
     }
 
@@ -31,103 +33,57 @@ class Play extends Phaser.Scene {
         
         // Map Zones
         this.zones = {
-            'school' : {
-                x: gameCenterX * 1.63,
-                y: gameCenterY*1.7,
-                minigames: minigameNames['school'],//['SchoolGum'],
+            'school': new Zone(this, gameCenterX * 1.63, gameCenterY * 1.7, 'school', {
+                minigames: Array.from(minigameNames['school']),
                 sprite: this.add.sprite(gameCenterX * 1.63, gameCenterY*1.18, 'school').setScale(this.map.scale*.9),
                 rotation: 0,
-                baseScale: this.map.scale*.9,
+                scale: this.map.scale*.9,
                 playing: false,
                 pathToCenter: [this.schoolRoad, this.bottomMid, this.centerRoad]
-                } ,
-            'home' : {
-                x: gameCenterX * .5,
-                y: gameCenterY * 1.7,
-                minigames: minigameNames['home'],
+            }),
+            'home': new Zone(this, gameCenterX * .5, gameCenterY * 1.7, 'home', {
+                minigames: Array.from(minigameNames['home']),
                 sprite: this.add.sprite(gameCenterX * .5, gameCenterY * 1.33, 'home').setScale(this.map.scale*.85),
                 rotation: 0,
-                baseScale: this.map.scale*.85,
+                scale: this.map.scale*.85,
                 playing: false,
                 pathToCenter: [this.homeRoad, this.bottomMid, this.centerRoad]
-                } ,
-            'plaza' : {
-                x: gameCenterX * .73,
-                y: gameCenterY * .93,
-                minigames: minigameNames['plaza'],// ['PickFood'],
+            }),
+            'plaza': new Zone(this, gameCenterX * .73, gameCenterY * .93, 'plaza', {
+                minigames: Array.from(minigameNames['plaza']),
                 sprite: this.add.sprite(gameCenterX * .73, gameCenterY * .5, 'plaza').setScale(this.map.scale*.85),
                 rotation: 0,
-                baseScale: this.map.scale*.85,
+                scale: this.map.scale*.85,
                 playing: false,
                 pathToCenter: [this.plazaRoad, this.centerLeft, this.centerRoad]
-                } ,
-            'town' : {
-                x: gameCenterX*1.8,
-                y: gameCenterY*.94,
-                minigames: minigameNames['town'],
+            }),
+            'town': new Zone(this, gameCenterX * 1.8, gameCenterY * .94, 'town', {
+                minigames: Array.from(minigameNames['town']),
                 sprite: this.add.sprite(gameCenterX * 1.5, gameCenterY * .6, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
                 rotation: 0,
-                baseScale: this.map.scale*.8,
+                scale: this.map.scale*.8,
                 playing: false,
                 pathToCenter: [this.townRoad, this.centerRight,this.centerRoad]
-            }
+            })
         }
 
-        for(const zone in this.zones){
-            console.log(this.zones[zone].sprite);
-            this.zones[zone].spriteY = this.zones[zone].sprite.y;
-            // console.log(this.zones[zone].spriteY);
-            // tweens
-            this.zones[zone].tween = this.tweens.add({
-                targets: this.zones[zone].sprite,
-                //ease: 'Sine.easeInOut',
-                props: {
-                    scale: {value: this.zones[zone].baseScale*1.3, duration: 2500, ease: 'Sine.easeInOut', yoyo: true, repeat: -1},
-                    angle: {from: '355', to: '365', duration: 3000, ease: 'Sine.easeInOut',clockwise: false, yoyo: true, repeat: -1},
-                    y: {value: this.zones[zone].spriteY - 50, duration:1500, ease:'Sine.easeInOut', yoyo:true, repeat: -1}
-                },
-                //loop: 1,
-                paused: true,
-            })
-
-            // interactivity for the town sprites
-            this.zones[zone].sprite.setInteractive();
-
-            // On hover over sprite
-            this.zones[zone].sprite.on('pointerover', () => {
-                console.log('Over the ' + zone);
-                this.zones[zone].tween.play();
-
-            });
-
-            // On hover off sprite
-            this.zones[zone].sprite.on('pointerout', () => {
-                console.log('Off the ' + zone);
-                this.zones[zone].tween.pause();
-                this.zones[zone].sprite.setScale(this.zones[zone].baseScale);
-                this.zones[zone].sprite.setAngle(0);
-                this.zones[zone].sprite.y = this.zones[zone].spriteY;
-            });
+        for(const zone of Object.values(this.zones)){
             
-            // On click release
-            // This is how we enter the minigames? 
-            this.zones[zone].sprite.on('pointerup', () => {
-                console.log('Clicked the ' + zone);
-
-                if(this.location == zone){
+            zone.clickCallback = () => {
+                if(this.location === zone.name){
 
                     //disable interactivity
-                    for(const dZone in this.zones){
-                        this.zones[dZone].sprite.disableInteractive();
+                    for(const dZone of Object.values(this.zones)){
+                        dZone.sprite.disableInteractive();
                     }
-
-                    this.launchMinigame();
+                    const minigameName = zone.getRandomMinigame();
+                    this.launchMinigame(minigameName);
                 }
-
-                if(!this.isWalking && this.location != zone){
+    
+                if(!this.isWalking && this.location !== zone.name){
                     this.walkTo(zone);
                 }
-            });
+            }
         }
 
         this.playerScale = this.map.scale*.2;
@@ -141,7 +97,7 @@ class Play extends Phaser.Scene {
         })
 
         this.isWalking = false;
-        this.location = null;
+        this.location = undefined;
 
         // this.walkTo('school');
         //this.walkToSchool();
@@ -155,7 +111,15 @@ class Play extends Phaser.Scene {
 
         this.uiScene = this.scene.get('uiScene');
 
-        this.sound.play('bgm', {loop:true, volume:.5});
+        // play bgm
+        // makes sure that the original and asian ver play at the same time
+        this.bgmAsian = this.sound.add('bgmAsian', {volume: .5});
+        this.bgmOriginal = this.sound.add('bgmOriginal', {loop: true,volume: .5})
+            .on(Phaser.Sound.Events.LOOPED, () => this.bgmAsian.play());
+        this.bgmOriginal.play();
+        this.bgmAsian.play();
+        
+        
     }
 
     update(time, delta) {
@@ -172,9 +136,9 @@ class Play extends Phaser.Scene {
     walkTo(zone){
         let walkPath = this.add.path(this.player.x, this.player.y);
 
-        console.log(this.zones[zone].pathToCenter);
+        console.log(zone.pathToCenter);
 
-        let flippedPath = [...this.zones[zone].pathToCenter];
+        let flippedPath = [...zone.pathToCenter];
         console.log(flippedPath);
         flippedPath.reverse();
 
@@ -184,7 +148,10 @@ class Play extends Phaser.Scene {
             this.player.flipX = false;
         }
 
-        if(this.location!=null){
+        // console.log(this.location)
+
+        if(this.location){
+            console.log(this.location, this.zones)
             for(const w of this.zones[this.location].pathToCenter){
                 console.log(w);
                 walkPath.lineTo(w.x, w.y);
@@ -202,7 +169,7 @@ class Play extends Phaser.Scene {
         }
 
         console.log(walkPath);
-        // walkPath.lineTo(this.zones[zone].x, this.zones[zone].y); 
+        // walkPath.lineTo(zone.x, zone.y); 
         this.player.play('walk');
         this.isWalking = true;
 
@@ -221,11 +188,11 @@ class Play extends Phaser.Scene {
         });
 
 
-        setTimeout(() => {
+        new Timer().start(1000, () => {
             this.isWalking = false;
-            this.location = zone;
+            this.location = zone.name;
             this.player.stop(null, true);
-        }, 1000);
+        });
 
 
     }
@@ -237,6 +204,12 @@ class Play extends Phaser.Scene {
         this.minigameTimer.stop();
         console.log('finished - closing minigame - minigame result:', result);
 
+        // pause minigame if minigame permits it
+        if (scene.pauseOnFinish) {
+            this.scene.pause(scene);
+        }
+
+        this.uiScene.overlay.moveAlpha(.5);
         this.uiScene.minigameEnd(result);
         
         // wait a little before closing door
@@ -246,6 +219,7 @@ class Play extends Phaser.Scene {
 
         // wait for door close
         await this.uiScene.closeDoor(300);
+        this.uiScene.overlay.setAlpha(0);
 
         // stop the minigame scene
         this.scene.stop(scene);
@@ -258,30 +232,30 @@ class Play extends Phaser.Scene {
         }
         
         // reenable interactivity
-        for(const zone in this.zones){
-            this.zones[zone].sprite.setInteractive();     
-            console.log(zone);       
+        for(const zone of Object.values(this.zones)){
+            zone.sprite.setInteractive();
         }
     }
 
-    async launchMinigame(minigameTimeLimit = 10000){
-        //something something this.zones[this.location].minigames
-        // temp minigame testing
-        console.log('launching minigame');
+    async launchMinigame(minigameName, minigameTimeLimit = 10000){
+        if (!minigameName) {
+            console.log('error launching minigame - minigameName is undefined');
+            return;
+        }
         
-        //picks a random minigame from the minigame list
-        let minigameName = this.zones[this.location].minigames[Math.floor(Math.random()*this.zones[this.location].minigames.length)];
-        
-        // console.log(this.location);
-        // console.log(this.zones[this.location]);
-        // console.log(minigameName);
-
+        console.log('launching minigame',minigameName);
         const sceneName = 'minigame' + minigameName;
 
         // wait for door to close
         this.uiScene.hideLives();
         await this.uiScene.closeDoor(300);
-        
+
+        // get the minigame scene and check for the create event
+        const currentMinigame = this.scene.get(sceneName);
+        currentMinigame.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
+            this.scene.pause(sceneName);
+        })
+
         // launch minigame
         this.scene.launch(sceneName);
         this.scene.bringToTop(sceneName);
@@ -291,14 +265,14 @@ class Play extends Phaser.Scene {
         await this.uiScene.openDoor(300);
 
         // then start minigame and timers
-        this.uiScene.minigameStart();
+        await this.uiScene.minigameStart();
+        this.scene.resume(sceneName);
 
-        const currentMinigame = this.scene.get(sceneName);
+        
 
         this.minigameTimer.start(minigameTimeLimit, () => {
             const result = currentMinigame.timeout();
             console.log('Minigame ran out of time');
-            this.minigameFinished(currentMinigame, result);
         });
     }
 

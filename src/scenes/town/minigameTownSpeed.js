@@ -20,6 +20,7 @@ class minigameTownSpeed extends Minigame {
 
     create() {
         super.create();
+        this.uiScene = this.scene.get('uiScene');
 
         // bg
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0x66BABB).setOrigin(0);
@@ -51,11 +52,15 @@ class minigameTownSpeed extends Minigame {
         this.signCurveProgress = 0;
 
         this.gasPedal = this.add.image(20, game.config.height - 400, 'gasPedal').setScale(1.5).setOrigin(0);
-        this.gasPedal.setInteractive();
         this.justDown = false;
         this.lastPointerX = 0;
         this.lastPointerY = 0;
         this.targetRotation = 0;
+        const arrowPath = new Phaser.Curves.Path(this.gasPedal.getTopRight().x-40, this.gasPedal.getTopRight().y+40);
+        arrowPath.quadraticBezierTo(this.gasPedal.getCenter().add({x:40,y:40}), this.gasPedal.getBottomLeft().add({x:80,y:-80}));
+        this.uiScene.addArrow(arrowPath, {
+            delay: 500, drawTime: 1000, lifeTime: 250, attachHand: true
+        })
 
         this.speedometer = this.add.image(game.config.width - 200, game.config.height - 230, 'speedometer').setOrigin(.5).setScale(1.5);
         this.speedometerHand = this.add.image(this.speedometer.x, this.speedometer.y, 'speedometerHand').setOrigin(.5,.75).setScale(this.speedometer.scale);
@@ -66,7 +71,6 @@ class minigameTownSpeed extends Minigame {
         }).setOrigin(.5,1);
         this.speed = 50;
 
-        this.uiScene = this.scene.get('uiScene');
         this.uiScene.setInstructions('Drag down pedal to accelerate');
     }
 
