@@ -322,7 +322,6 @@ class Play extends Phaser.Scene {
         this.minigameTimer.start(minigameTimeLimit, () => {
             const result = currentMinigame.timeout();
             console.log('Minigame ran out of time');
-            this.minigameFinished(currentMinigame, result);
         });
     }
 

@@ -35,8 +35,9 @@ class Minigame extends Phaser.Scene {
 
     // called by play.js or minigame manager when the timelimit is up
     timeout() {
-        this.isFinished = true;
+        // this.isFinished = true;
         this.onTimeout();
+        this.finish(this.isPassed);
         return this.isPassed;
     }
 
