@@ -9,6 +9,9 @@ class minigameSchoolMath extends Minigame {
         this.load.image('chalkboard', './assets/minigameSchoolMath/chalkboard.png');
         this.load.image('chalk', './assets/minigameSchoolMath/chalk.png');
         this.load.image('chalkParticle', './assets/minigameSchoolMath/chalk-particle.png');
+        
+        this.load.audio('chalkSlide', './assets/minigameSchoolMath/chalk-slide.wav');
+        this.load.audio('chalkTap', './assets/minigameSchoolMath/chalk-tap.wav');
     }
 
     create() {
@@ -45,6 +48,8 @@ class minigameSchoolMath extends Minigame {
 
         this.chalk = this.add.image(gameCenterX, gameCenterY, 'chalk').setOrigin(.5, 0).setScale(2);
         this.chalk.angle = -45;
+        this.chalk.soundTap = this.sound.add('chalkTap', {volume:1.5});
+        this.chalk.soundSlide = this.sound.add('chalkSlide', {volume:1, loop:true});
 
         this.currentStroke;
         this.inkStarted = false;
@@ -72,6 +77,8 @@ class minigameSchoolMath extends Minigame {
                 this.currentStrokeStart = Date.now()
                 this.inkStarted = true;
                 // this.emitter.start();
+                this.chalk.soundTap.play();
+                this.chalk.soundSlide.play({volume:0});
             }
             this.emitter.setPosition(pointer.x, pointer.y);
             this.graphics.lineBetween(this.lastPoint.x, this.lastPoint.y, pointer.x, pointer.y);
@@ -82,6 +89,7 @@ class minigameSchoolMath extends Minigame {
                 this.currentStroke[1].push(pointer.y);
                 this.currentStroke[2].push(this.inkTimer);
             }
+            this.chalk.soundSlide.setVolume(Math.min(2,(10 / distance) * 2));
 
             if (distance > 10) {
                 this.emitter.start();
@@ -93,6 +101,7 @@ class minigameSchoolMath extends Minigame {
         } else {
             this.lastPoint = undefined;
             if (this.currentStroke) {
+                this.chalk.soundSlide.stop();
                 this.ink.push(this.currentStroke);
                 this.currentStroke = undefined;
                 
