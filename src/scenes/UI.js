@@ -441,6 +441,17 @@ class UI extends Phaser.Scene {
         this.instructions.setText(text);
     }
 
+    createHand(options) {
+        const hand = new Hand(this, options);
+        return hand;
+    }
+
+    clearHands() {
+        for (const hand of this.activeHands) {
+            hand.destroy();
+        }
+    }
+
     // if options defined, overrides some properties
     drawArrow(path, options = {}) {
 
@@ -684,6 +695,7 @@ class UI extends Phaser.Scene {
         this.instructions.setVisible(false);
         this.timerBar.setVisible(false);
         this.clearArrows();
+        this.clearHands();
 
         if (result) {
             this.finishSuccess.show();
