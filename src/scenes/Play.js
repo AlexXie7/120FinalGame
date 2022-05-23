@@ -12,7 +12,9 @@ class Play extends Phaser.Scene {
         // this.load.image('player', './assets/TempPlayer.png');
 
         this.load.spritesheet('player', './assets/Player.png', {frameWidth: 400, frameHeight: 800, startFrame: 0, endFrame: 3});
-        this.load.audio('bgm', './assets/bgm.wav');
+        // this.load.audio('bgm', './assets/bgm.wav');
+        this.load.audio('bgmOriginal', './assets/bgm-original.mp3');
+        this.load.audio('bgmAsian', './assets/bgm-asian.mp3');
 
     }
 
@@ -155,7 +157,15 @@ class Play extends Phaser.Scene {
 
         this.uiScene = this.scene.get('uiScene');
 
-        this.sound.play('bgm', {loop:true, volume:.5});
+        // play bgm
+        // makes sure that the original and asian ver play at the same time
+        this.bgmAsian = this.sound.add('bgmAsian', {volume: .5});
+        this.bgmOriginal = this.sound.add('bgmOriginal', {loop: true,volume: .5})
+            .on(Phaser.Sound.Events.LOOPED, () => this.bgmAsian.play());
+        this.bgmOriginal.play();
+        this.bgmAsian.play();
+        
+        
     }
 
     update(time, delta) {
@@ -312,7 +322,6 @@ class Play extends Phaser.Scene {
         this.minigameTimer.start(minigameTimeLimit, () => {
             const result = currentMinigame.timeout();
             console.log('Minigame ran out of time');
-            this.minigameFinished(currentMinigame, result);
         });
     }
 
