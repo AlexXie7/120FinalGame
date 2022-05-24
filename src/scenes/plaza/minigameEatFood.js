@@ -42,11 +42,14 @@ class minigameEatFood extends Minigame {
         this.chopsticks = this.add.image(gameCenterX - 230 * this.scale, gameCenterY + 50 * this.scale, 'chopsticks').setOrigin(.5).setScale(this.scale);
         this.initDraggable(this.chopsticks);
         this.chopsticks.isCorrect = false;
+
+        this.uiScene.addPointArrow(this.fork.getCenter().x, this.fork.getCenter().y, 100, 220);
+        this.uiScene.addPointArrow(this.chopsticks.getCenter().x, this.chopsticks.getCenter().y, 100, 220);
         
         this.activePoint;
         this.eatTimer = 0;
 
-        this.uiScene.setInstructions('Eat some food');
+        this.uiScene.setInstructions('Eat food with utensils');
 
         this.score = 0;
     }
@@ -93,11 +96,18 @@ class minigameEatFood extends Minigame {
             object.targetY = pointer.y
             const point = object.getTopCenter();
             this.activePoint = point;
+            object.clearTint();
         })
         object.on(Phaser.Input.Events.DRAG_END, (pointer) => {
             object.targetX = object.startX
             object.targetY = object.startY
             this.activePoint = undefined;
+        })
+        object.on(Phaser.Input.Events.POINTER_OVER, () => {
+            object.setTintFill(0xFFFFFF);
+        })
+        object.on(Phaser.Input.Events.POINTER_OUT, () => {
+            object.clearTint();
         })
         object.update = (time, delta) => {
             object.x += (object.targetX - object.x) * delta * .01;
