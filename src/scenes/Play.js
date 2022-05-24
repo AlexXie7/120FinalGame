@@ -19,6 +19,44 @@ class Play extends Phaser.Scene {
     }
 
     create() {
+        // launch ui scene and move it to top
+        this.scene.launch('uiScene');
+        this.scene.bringToTop('uiScene');
+
+        // create minigame timer
+        this.minigameTimer = new Timer();
+
+        // once ui scene loads
+        this.uiScene = this.scene.get('uiScene');
+        
+        // skip tutorial
+        if (DEBUG_SKIP_TUTORIAL) {
+            this.createWorld();
+            return;
+        }
+
+
+        this.uiScene.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
+
+            // launch tutorial
+            this.launchMinigame('Tutorial', -1);
+        })
+
+        // once tutorial finishes
+        eventEmitter.once('tutorialFinished', () => {
+
+            // and door closes
+            eventEmitter.once('doorFinished',() => {
+
+                // create world
+                this.createWorld();
+            })
+        })
+        
+    }
+
+    // creates the map with zones
+    createWorld() {
         this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
        
         //road waypoints 
@@ -86,6 +124,8 @@ class Play extends Phaser.Scene {
             }
         }
 
+        this.mapCreated = true;
+
         this.playerScale = this.map.scale*.2;
         this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player').setScale(this.playerScale).setOrigin(.5, 1);
 
@@ -103,13 +143,7 @@ class Play extends Phaser.Scene {
         //this.walkToSchool();
         //console.log(this.school.sprite.x);
 
-        // launch ui scene and move it to top
-        this.scene.launch('uiScene');
-        this.scene.bringToTop('uiScene');
-
-        this.minigameTimer = new Timer();
-
-        this.uiScene = this.scene.get('uiScene');
+        
 
         // play bgm
         // makes sure that the original and asian ver play at the same time
@@ -232,12 +266,14 @@ class Play extends Phaser.Scene {
         }
         
         // reenable interactivity
-        for(const zone of Object.values(this.zones)){
-            zone.sprite.setInteractive();
+        if (this.mapCreated) {
+            for(const zone of Object.values(this.zones)){
+                zone.sprite.setInteractive();
+            }
         }
     }
 
-    async launchMinigame(minigameName, minigameTimeLimit = 10000){
+    async launchMinigame(minigameName, minigameTimeLimit = 10000) {
         if (!minigameName) {
             console.log('error launching minigame - minigameName is undefined');
             return;
@@ -268,12 +304,12 @@ class Play extends Phaser.Scene {
         await this.uiScene.minigameStart();
         this.scene.resume(sceneName);
 
-        
-
-        this.minigameTimer.start(minigameTimeLimit, () => {
-            const result = currentMinigame.timeout();
-            console.log('Minigame ran out of time');
-        });
+        if (minigameTimeLimit > 0) {
+            this.minigameTimer.start(minigameTimeLimit, () => {
+                const result = currentMinigame.timeout();
+                console.log('Minigame ran out of time');
+            });
+        }
     }
 
     // checks if a world x y position is touching an object based on its texture

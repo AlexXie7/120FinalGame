@@ -73,7 +73,7 @@ class MinigameName extends Minigame {
 
     }
 
-    update() {
+    update(time, delta) {
 
         // call when the minigame has a finished condition
         this.finish(true); // true if success, false if failure

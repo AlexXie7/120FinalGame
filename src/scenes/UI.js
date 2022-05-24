@@ -300,7 +300,7 @@ class UI extends Phaser.Scene {
         //     index = index + 1 === sides.length ? 0 : index + 1;
         // }, 1000)
 
-        this.createBubble(0,0,'pick a zone!', {maxWidth: 300, reference: game.input.activePointer});
+        // this.createBubble(0,0,'pick a zone!', {maxWidth: 300, reference: game.input.activePointer});
         
     }
 
