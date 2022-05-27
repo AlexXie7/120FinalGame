@@ -20,15 +20,21 @@ class minigameSchoolMath extends Minigame {
         const bg = this.add.image(0, 0, 'chalkboard').setOrigin(0);
         bg.setScale(game.config.width / bg.width, game.config.height / bg.height);
 
-        this.textConfig = {
+        const equationConfig = {
             fontFamily: 'Cursive',
             fontSize: '100px'
         }
-        this.equationText = this.add.text(gameCenterX, gameCenterY - 200,'chalky text', this.textConfig).setOrigin(.5);
+        const answerConfig = {
+            fontFamily: 'Cursive',
+            fontSize: '400px',
+            color: '#000'
+        }
+        this.equationText = this.add.text(gameCenterX, gameCenterY - 100,'eq', equationConfig).setOrigin(.5,1);
+        this.answerText = this.add.text(gameCenterX, gameCenterY - 100,'an', answerConfig).setOrigin(.5,0).setBlendMode(Phaser.BlendModes.MULTIPLY).setAlpha(0);
 
-        this.guessText = this.add.text(game.config.width, 0, 'guess', {fontSize: '32px'}).setOrigin(1, 0);
+        this.guessText = this.add.text(gameCenterX, game.config.height, '^^^', {fontSize: '32px'}).setOrigin(.5, 1);
 
-        this.uiScene.setInstructions(`Don't stand out`);
+        this.uiScene.setInstructions(`Write an answer`);
 
         // generate equation
         this.currentAnswer = this.createEquation();
@@ -126,6 +132,12 @@ class minigameSchoolMath extends Minigame {
             this.inkTimer += delta;
         }
 
+        if (this.answerText.alpha < .3) {
+            this.answerText.setAlpha(this.answerText.alpha + delta * .0004);
+        } else {
+            this.answerText.setAlpha(.3);
+        }
+
         // if (this.playScene.minigameTimer.getProgress() >)
     }
 
@@ -141,6 +153,14 @@ class minigameSchoolMath extends Minigame {
                 // check if the answer is right. if its right, cause failure
                 if (parseInt(answer) === this.currentAnswer) {
                     super.finish(false);
+                    const comments = ['booring', '🤓🤓', 'imagine knowing the answer', 'what a nerd'];
+                    for (let i = 0; i < 3; i++) {
+                        const index = Math.floor(Math.random() * comments.length);
+                        const bubble = this.uiScene.createBubble(0,0,comments[index], {maxWidth: 300, delay: i * 300, drawTime: 500});
+                        comments.splice(index, 1);
+                        bubble.setPositionFromStem(game.config.width * (i / 3) + Math.random() * 100 + 80, game.config.height);
+                    }
+                    
                 } else {
                     super.finish(true);
                 }
@@ -148,10 +168,6 @@ class minigameSchoolMath extends Minigame {
                 super.finish(true);
             }
         });
-    }
-
-    onTimeout() {
-        // do timeout operations ex: clear any ui stuff
     }
 
     // returns answer
@@ -168,6 +184,9 @@ class minigameSchoolMath extends Minigame {
         this.equationText.setText(`${a} ${op} ${b} =`);
 
         const answer = op.func(a, b);
+
+        this.answerText.setText(`${answer}`);
+        
         return answer;
     }
 

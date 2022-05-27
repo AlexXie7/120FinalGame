@@ -18,12 +18,18 @@ class UI extends Phaser.Scene {
 
         // flag for lives
         this.load.image('flagSmall', './assets/flag-small.png');
+        
+        // bubbles
+        // this.load.image('bubbleCorner', './assets/bubble-corner.png');
+        this.load.image('bubbleStem','./assets/bubble-stem.png');
 
         // load sounds
         this.load.audio('soundSuccess', './assets/right.wav');
         this.load.audio('soundFailure', './assets/wrong.wav');
+        this.load.audio('soundMinigameFailure', './assets/failure.wav');
         // win sound, lose sound
         // fireworks sound,
+        this.load.audio('soundFireworks', './assets/fireworks.wav');
         // click sound? drag sound?
         // double door sound
         // lose life sound
@@ -127,6 +133,7 @@ class UI extends Phaser.Scene {
         }
         this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5);
         const ins = this.instructions;
+        ins.setDepth(1);
         ins.setFontSize(64);
         ins.fontSize = 64;
         ins.setVisible(false);
@@ -204,6 +211,7 @@ class UI extends Phaser.Scene {
                 blendMode: Phaser.BlendModes.ADD
             });
             emitter.explode(50, gameCenterX + Math.random() * gameCenterX * bias, gameCenterY + Math.random() * 500 - 250);
+            this.sound.play('soundFireworks', {volume: 2});
         }
 
         // success and failure sings (when minigame ends)
@@ -243,6 +251,7 @@ class UI extends Phaser.Scene {
             this.finishFailure.lifeTime = dur;
             this.finishFailure.timer = 0;
             this.finishFailure.isFinished = false;
+            this.sound.play('soundMinigameFailure', {volume: 2});
         }
         this.finishFailure.update = (time, delta) => {
             if (this.finishFailure.visible && !this.finishFailure.isFinished) {
@@ -278,26 +287,29 @@ class UI extends Phaser.Scene {
             this.addLife();
         }
         
-        // test arrows
-        // {
-        //     const path = new Phaser.Curves.Path(gameCenterX,gameCenterY);
-        //     path.lineTo(200,200);
-        //     path.lineTo(200,700);
-        //     path.quadraticBezierTo(800,700,500,500);
-        //     path.splineTo([600,600,600,200]);
-        //     this.addArrow(path);
-        // }
-        // {
-        //     const path = new Phaser.Curves.Path(0,0);
-        //     path.lineTo(500,800);
-        //     // path.lineTo(200,700);
-        //     path.quadraticBezierTo(1000,200,1000,900);
-        //     // path.splineTo([600,600,600,200]);
-        //     this.addArrow(path, {drawTime: 2000, color: 0xFFFF00, width: 20});
-        // }
+        // test bubbles
+        // new Bubble(this, gameCenterX + 300, gameCenterY, 'hello everynyan how are you fine thank you', {maxWidth: undefined, stemSide: 'left'});
+        // new Bubble(this, gameCenterX - 300, gameCenterY, 'hello everynyan how are you fine thank you', {maxWidth: 200, stemSide: 'right'});
+        // new Bubble(this, gameCenterX, gameCenterY + 300, 'hello everynyan how are you fine thank you', {maxWidth: 200, stemSide: 'top'});
+        // new Bubble(this, gameCenterX, gameCenterY - 300, 'hello everynyan how are you fine thank you', {maxWidth: 200, stemSide: 'bottom'});
+        // this.testBubble = new Bubble(this, gameCenterX + 300, gameCenterY, 'i am a bubble following you', {maxWidth: 300, stemSide: 'left'});
+        // let index = 0;
+        // setInterval(() => {
+        //     const sides = ['left','top','right','bottom'];
+        //     this.testBubble.setStem(sides[index]);
+        //     index = index + 1 === sides.length ? 0 : index + 1;
+        // }, 1000)
+
+        // this.createBubble(0,0,'pick a zone!', {maxWidth: 300, reference: game.input.activePointer});
+        
     }
 
     update(time, delta) {
+        // this.testBubble.update(time, delta);
+        // const pointer = game.input.activePointer;
+        // this.testBubble.setStem(undefined, Math.sin(time * .01) * .5 + .5)
+        // this.testBubble.setPositionFromStem(pointer.x, pointer.y);
+        // this.testBubble.setAlpha(Math.sin(time * .005) * .5 + .5);
 
         // update main signs
         this.finishSuccess.update(time, delta);
@@ -439,6 +451,17 @@ class UI extends Phaser.Scene {
 
     setInstructions(text) {
         this.instructions.setText(text);
+    }
+
+    createHand(options) {
+        const hand = new Hand(this, options);
+        return hand;
+    }
+
+    clearHands() {
+        for (const hand of this.activeHands) {
+            hand.destroy();
+        }
     }
 
     // if options defined, overrides some properties
@@ -639,6 +662,24 @@ class UI extends Phaser.Scene {
         this.arrowPaths.push(path);
     }
 
+    // add simple arrow that points to position x, y
+    // angle is in degrees
+    addPointArrow(x, y, length = 100, angle = 45, options = {}) {
+        options.delay = options.delay || 300;
+        options.drawTime = options.drawTime || 300;
+        options.lifeTime = options.lifeTime || 600;
+        options.destroyTime = options.destroyTime || 200;
+        const triangleHeight = 60;
+        length = Math.max(length, triangleHeight + 10);
+        const rad = angle * Math.PI / 180;
+        const target = new Phaser.Math.Vector2(x, y);
+        const source = new Phaser.Math.Vector2(x + Math.sin(rad) * (length + triangleHeight), y + Math.cos(rad) * (length + triangleHeight));
+        const path = new Phaser.Curves.Path(source.x, source.y);
+        path.lineTo(source.clone().add(target.subtract(source).normalize().scale(length)));
+        options.triangleHeight = triangleHeight;
+        this.addArrow(path, options);
+    }
+
     clearArrows() {
         for (const path of this.arrowPaths) {
             path.isDestroyed = true;
@@ -684,9 +725,11 @@ class UI extends Phaser.Scene {
         this.instructions.setVisible(false);
         this.timerBar.setVisible(false);
         this.clearArrows();
+        this.clearHands();
 
         if (result) {
             this.finishSuccess.show();
+            // show comments/dialogue about why u failed or reactions
         } else {
             this.finishFailure.show();
         }
@@ -704,6 +747,13 @@ class UI extends Phaser.Scene {
             sign.destroy();
             sign.isDestroyed = true;
         }
+    }
+
+
+    createBubble(x, y, text, options = {}) {
+        const bubble = new Bubble(this, x, y, text, options);
+        this.activeSigns.push(bubble);
+        return bubble;
     }
 
     createText(x, y, text, config = {}) {

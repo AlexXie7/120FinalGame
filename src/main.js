@@ -37,7 +37,7 @@ const config = {
         // width: window.innerWidth * window.devicePixelRatio,
         // height: window.innerHeight * window.devicePixelRatio
     },
-    scene: [Play, Minigame, UI].concat(minigameClasses), // adds minigameClasses to the scene list
+    scene: [Menu, Play, Minigame, minigameTutorial, UI].concat(minigameClasses), // adds minigameClasses to the scene list
 };
 
 
@@ -57,3 +57,9 @@ let gameCenterX = config.scale.width  / 2;
 
 // phaser event manager
 const eventEmitter = new Phaser.Events.EventEmitter();
+
+
+// if true, skip to tutorial with no menu
+const DEBUG_SKIP_MENU = true;
+// if true, skip to play scene with no tutorial
+const DEBUG_SKIP_TUTORIAL = true;
