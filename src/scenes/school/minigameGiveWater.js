@@ -14,6 +14,12 @@ class minigameGiveWater extends Minigame {
         this.hands = [];
         this.towelBox = this.add.rectangle(gameCenterX*.25, gameCenterY*1.75, 100, 100, 0xFF0000);
         this.waterBox = this.add.rectangle(gameCenterX*1.75,gameCenterY*1.75, 100, 100, 0x0000FF);
+        
+        this.bg = this.add.image(0, 0, 'bg').setOrigin(0).setDepth(-2);
+        this.bg.setScale(
+            game.config.width / this.bg.width,
+            game.config.height / this.bg.height
+        );
 
         for(let n = 1; n <= 7; n++){
             this.hands.push(this.add.rectangle(game.config.width/8 * (n), gameCenterY/2, 50, 200, 0xFFFFFF).setAngle(-40 + 10*n));
