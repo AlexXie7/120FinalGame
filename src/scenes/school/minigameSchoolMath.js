@@ -181,7 +181,7 @@ class minigameSchoolMath extends Minigame {
         ]
         const op = ops[Math.floor(Math.random() * ops.length)];
         
-        this.equationText.setText(`${a} ${op} ${b}`);
+        this.equationText.setText(`${a} ${op} ${b} =`);
 
         const answer = op.func(a, b);
 

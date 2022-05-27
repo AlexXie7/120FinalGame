@@ -16,12 +16,16 @@ class Bubble extends Phaser.GameObjects.Container {
         this.text.setText(this.text.advancedWordWrap(text, this.text.context, options.maxWidth || 500));
         this.verticalRectangle = scene.add.rectangle(0,0, 1,1,0xFFFFFF).setOrigin(.5);
         this.horizontalRectangle = scene.add.rectangle(0,0, 1,1,0xFFFFFF).setOrigin(.5);
-        this.corners = [
-            scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(0),
-            scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(90),
-            scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(180),
-            scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(270),
-        ];
+        // this.corners = [
+        //     scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(0),
+        //     scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(90),
+        //     scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(180),
+        //     scene.add.image(0,0,'bubbleCorner').setOrigin(1).setAngle(270),
+        // ];
+        this.corners = [];
+        for (let i = 0; i < 4; i++) {
+            this.corners.push(scene.add.circle(0,0,32,0xFFFFFF));
+        }
         // this.setSize(this.text.width, this.text.height);
         
         this.stem = scene.add.image(0,0,'bubbleStem').setOrigin(0);
@@ -33,7 +37,7 @@ class Bubble extends Phaser.GameObjects.Container {
         this.add(this.horizontalRectangle);
         this.add(this.stem);
         for (const corner of this.corners) {
-            corner.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+            // corner.texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
             this.add(corner);
         }
         this.add(this.text);
