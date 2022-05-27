@@ -4,7 +4,7 @@ class Play extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('map', './assets/Map.png');
+        this.load.image('map', './assets/Map.jpg');
         this.load.image('school', './assets/School.png');
         this.load.image('town', './assets/Town.png');
         this.load.image('plaza', './assets/Plaza.png');
