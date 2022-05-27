@@ -1,0 +1,108 @@
+*, *::before, *::after {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    --toolbar-height: 24px;
+}
+
+#interface-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    pointer-events: none;
+}
+
+#interface-container > * {
+    pointer-events: all;
+}
+
+#toolbar {
+    width: 100vw;
+    height: var(--toolbar-height);
+    background: blue;
+}
+
+#toolbar > .tool {
+    float: left;
+}
+
+.tool {
+    /* display: inline; */
+    background-color: blue;
+}
+
+button {
+    background: none;
+    color: yellow;
+}
+
+button:hover:not(button:disabled),
+button:focus:not(button:disabled) {
+    background: yellow;
+    color: blue;
+}
+
+button:active:not(button:disabled) {
+    background: white;
+    color: black;
+}
+
+button:disabled {
+    color: gray;
+}
+
+.tool-children {
+    /* display: inline; */
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* float: left; */
+}
+
+.dialog {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: auto;
+    height: auto;
+    min-width: 100px;
+    min-height: 100px;
+    background: blue;
+    color: yellow;
+
+    padding: 5px;
+}
+
+.dialog-error {
+    color: red;
+}
+
+#right-container {
+    position: absolute;
+    top: var(--toolbar-height);
+    right: 0;
+}
+
+tr {
+    background: blue;
+    color: yellow;
+}
+
+tr:nth-child(2n) {
+    background: navy;
+}
+
+#properties-container td.align-right {
+    text-align: right;
+}
+
+#properties-container td.align-left {
+    text-align: left;
+}
+

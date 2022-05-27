@@ -20,7 +20,7 @@ class UI extends Phaser.Scene {
         this.load.image('flagSmall', './assets/flag-small.png');
         
         // bubbles
-        this.load.image('bubbleCorner', './assets/bubble-corner.png');
+        // this.load.image('bubbleCorner', './assets/bubble-corner.png');
         this.load.image('bubbleStem','./assets/bubble-stem.png');
 
         // load sounds
