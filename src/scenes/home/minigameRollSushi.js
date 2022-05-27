@@ -16,7 +16,7 @@ class minigameRollSushi extends Minigame {
     create() {
         super.create();
 
-        this.uiScene = this.scene.get('uiScene');
+        // this.uiScene = this.scene.get('uiScene');
         this.uiScene.setInstructions('Spread Rice!');
 
         this.bg = this.add.sprite(gameCenterX, gameCenterY, 'sushiMat').setDisplaySize(game.scale.width, game.scale.height);

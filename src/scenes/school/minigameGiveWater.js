@@ -5,7 +5,7 @@ class minigameGiveWater extends Minigame {
 
     preload() {
         super.preload();
-
+        this.load.image('bg', '/assets/minigameGiveWater/fieldBackground.png');
     }
 
     create() {
