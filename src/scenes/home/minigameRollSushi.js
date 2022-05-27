@@ -25,6 +25,7 @@ class minigameRollSushi extends Minigame {
         this.rice = this.add.rectangle(gameCenterX, gameCenterY * 1.5, this.nori.width - 10, this.nori.height/4, '0xFFFFFF').setInteractive();
 
         this.arrow = this.add.sprite(gameCenterX, gameCenterY*2, 'arrowUp').setAlpha(0).setScale(.1);
+        this.arrow.y -= this.arrow.height;
 
         //pick up the whole peanut butter and dump it on the sushi
         this.pb = this.add.sprite(0, gameCenterY, 'pb').setInteractive().setAlpha(0);

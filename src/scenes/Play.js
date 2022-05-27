@@ -79,8 +79,57 @@ class Play extends Phaser.Scene {
                     const minigameName = zone.getRandomMinigame();
                     this.launchMinigame(minigameName);
                 }
-    
-                if(!this.isWalking && this.location !== zone.name){
+                
+                if(this.location == 'school' && zone.name == 'home'){
+
+                    let walkPath = this.add.path(this.player.x, this.player.y);
+                    walkPath.lineTo(this.homeRoad.x, this.homeRoad.y);
+
+                    this.player.play('walk');
+                    this.isWalking = true;
+                    this.player.path = walkPath;
+
+                    this.player.startFollow({
+                        from: 0,
+                        to: 1,
+                        delay: 0,
+                        duration: 1000,
+                        ease: 'Quad.easeInOut',
+                        hold: 0,
+                    });
+            
+                    new Timer().start(1000, () => {
+                        this.isWalking = false;
+                        this.location = zone.name;
+                        this.player.stop(null, true);
+                    });
+
+                } else if (this.location == 'home' && zone.name == 'school'){
+
+                    let walkPath = this.add.path(this.player.x, this.player.y);
+                    walkPath.lineTo(this.schoolRoad.x, this.schoolRoad.y);
+
+                    this.player.flipX = true;
+                    this.player.play('walk');
+                    this.isWalking = true;
+                    this.player.path = walkPath;
+
+                    this.player.startFollow({
+                        from: 0,
+                        to: 1,
+                        delay: 0,
+                        duration: 1000,
+                        ease: 'Quad.easeInOut',
+                        hold: 0,
+                    });
+            
+                    new Timer().start(1000, () => {
+                        this.isWalking = false;
+                        this.location = zone.name;
+                        this.player.stop(null, true);
+                    });
+
+                } else if(!this.isWalking && this.location !== zone.name){
                     this.walkTo(zone);
                 }
             }
