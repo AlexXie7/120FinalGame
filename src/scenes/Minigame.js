@@ -21,6 +21,8 @@ class Minigame extends Phaser.Scene {
         this.pauseOnFinish = true; // set to false in create if you want minigame to keep updating after finish
         // perhaps for an ending animation
         
+        this.timerScale = 1; // scales the timer by this amount when minigame is launched
+
         // test minigame code
         // this.add.rectangle(20, 20, game.config.width - 40, game.config.height - 40, '#FCF');
         this.add.text(40, 40, 'minigame' + this.id);

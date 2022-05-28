@@ -756,8 +756,31 @@ class UI extends Phaser.Scene {
         return bubble;
     }
 
-    createText(x, y, text, config = {}) {
+    createText(x, y, text, config = {fontSize: '64px', stroke: '#000', strokeThickness: 4}) {
         const sign = this.add.text(x, y, text, config).setOrigin(.5);
+        let lifeTime = 1000;
+        let timer = 0;
+
+        sign.update = (time, delta) => {
+            
+            if (sign.isDestroyed) {
+                return;
+            }
+
+            let progress = timer / lifeTime;
+
+            sign.y = y - progress * 20;
+            if (progress > .5) {
+                sign.setAlpha((.5 - (progress - .5)) * 2);
+            }
+
+            if (progress >= 1) {
+                sign.destroy();
+                sign.isDestroyed = true;
+            }
+
+            timer += delta;
+        };
         this.activeSigns.push(sign);
     }
 
