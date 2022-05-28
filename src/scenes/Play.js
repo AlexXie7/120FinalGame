@@ -304,6 +304,9 @@ class Play extends Phaser.Scene {
         await this.uiScene.minigameStart();
         this.scene.resume(sceneName);
 
+        // scale timer by minigame timer scale
+        minigameTimeLimit *= currentMinigame.timerScale;
+
         if (minigameTimeLimit > 0) {
             this.minigameTimer.start(minigameTimeLimit, () => {
                 const result = currentMinigame.timeout();
