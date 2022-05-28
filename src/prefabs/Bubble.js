@@ -69,7 +69,7 @@ class Bubble extends Phaser.GameObjects.Container {
             return;
         }
 
-        if (this.reference && this.followReference) {
+        if (this.reference && this.followReference && this.reference.x !== undefined && this.reference.y !== undefined) {
             this.setPositionFromStem(this.reference.x + this.offsetX, this.reference.y + this.offsetY);
         }
 
