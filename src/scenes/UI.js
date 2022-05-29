@@ -129,7 +129,8 @@ class UI extends Phaser.Scene {
             align: 'center',
             fontSize: '64px',
             stroke: '#000',
-            strokeThickness: 4
+            strokeThickness: 4,
+            maxLines: 1
         }
         this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5);
         const ins = this.instructions;
