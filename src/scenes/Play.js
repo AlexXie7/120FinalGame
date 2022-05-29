@@ -19,6 +19,9 @@ class Play extends Phaser.Scene {
     }
 
     create() {
+        // disable right click menu
+        game.canvas.addEventListener('contextmenu', (e) => {e.preventDefault()});
+
         // launch ui scene and move it to top
         this.scene.launch('uiScene');
         this.scene.bringToTop('uiScene');
