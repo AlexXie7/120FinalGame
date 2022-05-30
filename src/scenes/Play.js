@@ -67,7 +67,7 @@ class Play extends Phaser.Scene {
         // game mode
         this.mode = 'auto'; // use 'free' to pick
 
-        this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
+        this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.config.width, game.config.height);
        
         //road waypoints 
         this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
