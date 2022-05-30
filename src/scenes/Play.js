@@ -67,8 +67,10 @@ class Play extends Phaser.Scene {
         // game mode
         this.mode = 'auto'; // use 'free' to pick
 
-        this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.config.width, game.config.height);
-       
+        this.map = this.add.sprite(gameCenterX, gameCenterY,'map');//.setDisplaySize(game.config.width, game.config.height);
+        this.map.setScale(Math.max(game.config.width / this.map.width, game.config.height / this.map.height));
+        // console.log(this.map.scale)
+
         //road waypoints 
         this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
         this.centerLeft  = this.add.rectangle(gameCenterX*.88, gameCenterY*.93, 5, 5, 0x000000);
