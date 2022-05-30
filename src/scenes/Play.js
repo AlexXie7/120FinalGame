@@ -83,7 +83,7 @@ class Play extends Phaser.Scene {
         this.zones = {
             'school': new Zone(this, gameCenterX * 1.63, gameCenterY * 1.7, 'school', {
                 minigames: Array.from(minigameNames['school']),
-                sprite: this.add.sprite(gameCenterX * 1.63, gameCenterY*1.18, 'school').setScale(this.map.scale*.9),
+                sprite: this.add.sprite(gameCenterX * 1.55, gameCenterY*1.3, 'school').setScale(this.map.scale*.7),
                 rotation: 0,
                 scale: this.map.scale*.9,
                 playing: false,
@@ -91,15 +91,14 @@ class Play extends Phaser.Scene {
             }),
             'home': new Zone(this, gameCenterX * .5, gameCenterY * 1.7, 'home', {
                 minigames: Array.from(minigameNames['home']),
-                sprite: this.add.sprite(gameCenterX * .5, gameCenterY * 1.33, 'home').setScale(this.map.scale*.85),
-                rotation: 0,
+                sprite: this.add.sprite(gameCenterX * .4, gameCenterY * 1.33, 'home').setScale(this.map.scale*1.2),rotation: 0,
                 scale: this.map.scale*.85,
                 playing: false,
                 pathToCenter: [this.homeRoad, this.bottomMid, this.centerRoad]
             }),
             'plaza': new Zone(this, gameCenterX * .73, gameCenterY * .93, 'plaza', {
                 minigames: Array.from(minigameNames['plaza']),
-                sprite: this.add.sprite(gameCenterX * .73, gameCenterY * .5, 'plaza').setScale(this.map.scale*.85),
+                sprite: this.add.sprite(gameCenterX * .5, gameCenterY * .65, 'plaza'),
                 rotation: 0,
                 scale: this.map.scale*.85,
                 playing: false,
@@ -107,7 +106,7 @@ class Play extends Phaser.Scene {
             }),
             'town': new Zone(this, gameCenterX * 1.8, gameCenterY * .94, 'town', {
                 minigames: Array.from(minigameNames['town']),
-                sprite: this.add.sprite(gameCenterX * 1.5, gameCenterY * .6, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
+                sprite: this.add.sprite(gameCenterX * 1.2, gameCenterY * .7, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
                 rotation: 0,
                 scale: this.map.scale*.8,
                 playing: false,
