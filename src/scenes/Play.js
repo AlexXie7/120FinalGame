@@ -4,7 +4,7 @@ class Play extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('map', './assets/Map.jpg');
+        this.load.image('map', './assets/map.jpg');
         this.load.image('school', './assets/School.png');
         this.load.image('town', './assets/Town.png');
         this.load.image('plaza', './assets/Plaza.png');
@@ -67,9 +67,8 @@ class Play extends Phaser.Scene {
         // game mode
         this.mode = 'auto'; // use 'free' to pick
 
-        this.map = this.add.sprite(gameCenterX, gameCenterY,'map');//.setDisplaySize(game.config.width, game.config.height);
+        this.map = this.add.sprite(gameCenterX, gameCenterY,'map');
         this.map.setScale(Math.max(game.config.width / this.map.width, game.config.height / this.map.height));
-        // console.log(this.map.scale)
 
         //road waypoints 
         this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
