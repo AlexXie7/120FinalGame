@@ -38,6 +38,9 @@ class Play extends Phaser.Scene {
             return;
         }
 
+        // bool of whether the game is started. set after tutorial is finished / world is created
+        this.isStarted = false;
+
 
         this.uiScene.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
 
@@ -60,6 +63,10 @@ class Play extends Phaser.Scene {
 
     // creates the map with zones
     createWorld() {
+
+        // game mode
+        this.mode = 'auto'; // use 'free' to pick
+
         this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
        
         //road waypoints 
@@ -110,6 +117,11 @@ class Play extends Phaser.Scene {
 
         for(const zone of Object.values(this.zones)){
             
+            // only make interactive if mode is free
+            if (this.mode === 'free') {
+                zone.sprite.setInteractive();
+            }
+
             zone.clickCallback = () => {
                 if(this.location === zone.name){
 
@@ -191,11 +203,6 @@ class Play extends Phaser.Scene {
         this.isWalking = false;
         this.location = undefined;
 
-        // this.walkTo('school');
-        //this.walkToSchool();
-        //console.log(this.school.sprite.x);
-
-        
 
         // play bgm
         // makes sure that the original and asian ver play at the same time
@@ -206,6 +213,21 @@ class Play extends Phaser.Scene {
         this.bgmAsian.play();
         
         
+        this.minigameTimeLimit = 10000;
+
+        
+        new Timer().start(1000, () => {
+            if (this.mode === 'auto') {
+                // set started to true
+                this.isStarted = true;
+
+                this.walkToRandomZone((zone) => {
+                    console.log('first mingame start')
+                    const minigameName = zone.getRandomMinigame();
+                    this.launchMinigame(minigameName, this.minigameTimeLimit);
+                });
+            }
+        })
     }
 
     update(time, delta) {
@@ -219,7 +241,17 @@ class Play extends Phaser.Scene {
         
     }
 
-    walkTo(zone){
+    walkToRandomZone(callback = () => {}) {
+
+        // add logic to choose zone based on minigame availability
+        // so that each zone is finished at the same time
+
+        const zones = Object.values(this.zones);
+        const zone = zones[Math.floor(Math.random() * zones.length)];
+        this.walkTo(zone, callback);
+    }
+
+    walkTo(zone, callback = () => {}){
         let walkPath = this.add.path(this.player.x, this.player.y);
 
         console.log(zone.pathToCenter);
@@ -259,12 +291,14 @@ class Play extends Phaser.Scene {
         this.player.play('walk');
         this.isWalking = true;
 
+        const walkDuration = 1000;
+
         this.player.path = walkPath;
         this.player.startFollow({
             from: 0,
             to: 1,
             delay: 0,
-            duration: 1000,
+            duration: walkDuration,
             ease: 'Quad.easeInOut',
             hold: 0,
             //flipX: true,
@@ -274,10 +308,11 @@ class Play extends Phaser.Scene {
         });
 
 
-        new Timer().start(1000, () => {
+        new Timer().start(walkDuration, () => {
             this.isWalking = false;
             this.location = zone.name;
             this.player.stop(null, true);
+            callback(zone);
         });
 
 
@@ -317,10 +352,22 @@ class Play extends Phaser.Scene {
             this.uiScene.removeLife();
         }
         
-        // reenable interactivity
-        if (this.mapCreated) {
-            for(const zone of Object.values(this.zones)){
-                zone.sprite.setInteractive();
+        // isStarted is set after tutorial finishes
+        if (this.mapCreated && this.isStarted) {
+
+            if (this.mode === 'free') {
+                // reenable interactivity
+                for(const zone of Object.values(this.zones)){
+                    zone.sprite.setInteractive();
+                }
+            } else if (this.mode === 'auto') {
+                // automatically go to next minigame
+                this.walkToRandomZone((zone) => {
+                    console.log('minigame end start new min')
+
+                    const minigameName = zone.getRandomMinigame();
+                    this.launchMinigame(minigameName, this.minigameTimeLimit);
+                });
             }
         }
     }
