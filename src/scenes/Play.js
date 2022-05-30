@@ -386,14 +386,22 @@ class Play extends Phaser.Scene {
 
         // get the minigame scene and check for the create event
         const currentMinigame = this.scene.get(sceneName);
-        currentMinigame.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
-            this.scene.pause(sceneName);
-        })
+        
 
-        // launch minigame
-        this.scene.launch(sceneName);
-        this.scene.bringToTop(sceneName);
-        this.scene.bringToTop('uiScene'); // move UI scene to the top
+        await new Promise((resolve, reject) => {
+
+            currentMinigame.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
+                this.scene.pause(sceneName);
+                resolve();
+            })
+
+            // launch minigame
+            this.scene.launch(sceneName);
+            this.scene.bringToTop(sceneName);
+            this.scene.bringToTop('uiScene'); // move UI scene to the top
+
+        })
+        
 
         // wait for door to open
         await this.uiScene.openDoor(300);
