@@ -25,7 +25,7 @@ class Minigame extends Phaser.Scene {
 
         // test minigame code
         // this.add.rectangle(20, 20, game.config.width - 40, game.config.height - 40, '#FCF');
-        this.add.text(40, 40, 'minigame' + this.id);
+        this.add.text(40, 40, 'minigame' + this.id).setDepth(-10);
 
         console.log('created');
     }
