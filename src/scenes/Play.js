@@ -346,7 +346,7 @@ class Play extends Phaser.Scene {
         this.scene.stop(scene);
 
         // open doors to map
-        this.uiScene.openDoor(300);
+        await this.uiScene.openDoor(300);
         this.uiScene.showLives();
         if (!result) {
             this.uiScene.removeLife();
