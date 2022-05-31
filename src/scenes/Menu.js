@@ -8,6 +8,8 @@ class Menu extends Phaser.Scene {
         this.load.image('menuBoxBack', './assets/menu/box-back.png');
         this.load.image('menuBoxMiddle', './assets/menu/box-middle.png');
         this.load.image('menuBoxFront', './assets/menu/box-front.png');
+        this.load.spritesheet('playButton', './assets/menu/play-button.png', {frameWidth: 300, frameHeight: 100});
+        this.load.spritesheet('creditButton', './assets/menu/credit-button.png', {frameWidth: 300, frameHeight: 100});
     }
 
     create() {
@@ -33,21 +35,44 @@ class Menu extends Phaser.Scene {
             color: '#000'
         }
 
-        // replace with image later probably instead of text
-        this.startButton = this.add.text(gameCenterX, gameCenterY, 'start', textConfig).setOrigin(.5);
-        this.initButton(this.startButton, () => {
-            this.state = 'starting';
+        // buttons
+        this.playButton = this.add.sprite(gameCenterX, gameCenterY, 'playButton', 0).setOrigin(.5);
+        this.initButton(this.playButton, () => {
+            this.state = 'fading';
+            this.playButton.disable();
+            this.creditButton.disable();
         });
-        this.helpButton = this.add.text(gameCenterX, gameCenterY + this.startButton.displayHeight + 20, 'help', textConfig).setOrigin(.5);
-        this.initButton(this.helpButton);
+        this.creditButton = this.add.sprite(gameCenterX, gameCenterY + this.playButton.displayHeight + 20, 'creditButton', 0).setOrigin(.5);
+        this.initButton(this.creditButton, () => {
+            // open credits
+        });
         
         this.timer = 0;
 
         this.state = 'none';
+
+        // object to fade out before starting, buttons and logos
+        this.toFade = [this.playButton, this.creditButton];
     }
 
     update(time, delta) {
-        if (this.state === 'starting') {
+        if (this.state === 'fading') {
+            if (this.toFade.length > 0) {
+                for (let i = 0; i < this.toFade.length; i++) {
+                    const object = this.toFade[i];
+                    if (object.alpha <= 0) {
+                        object.setAlpha(0);
+                        // object.destroy();
+                        this.toFade.splice(i, 1);
+                        i -= 1;
+                    } else {
+                        object.setAlpha(object.alpha - delta * .001);
+                    }
+                }
+            } else {
+                this.state = 'starting';
+            }
+        } else if (this.state === 'starting') {
 
             if (this.boxes.length > 0) {
                 const box = this.boxes[this.boxes.length - 1];
@@ -73,15 +98,36 @@ class Menu extends Phaser.Scene {
     }
 
     initButton(object, callback = () => {}) {
+        const overlay = this.add.sprite(object.x, object.y, object.texture.key, 0)
+            .setScale(object.scaleX, object.scaleY)
+            .setOrigin(object.originX, object.originY)
+            .setDepth(object.depth)
+            .setAlpha(0);
+        overlay.setBlendMode(Phaser.BlendModes.ADD);
+        object.overlay = overlay;
+        const highlightAlpha = .5;
         object.setInteractive()
-        object.on(Phaser.Input.Events.PIONTER_OVER, () => {
-
+        object.on(Phaser.Input.Events.POINTER_OVER, () => {
+            overlay.setAlpha(highlightAlpha);
         })
-        object.on(Phaser.Input.Events.PIONTER_OUT, () => {
-            
+        object.on(Phaser.Input.Events.POINTER_OUT, () => {
+            overlay.setAlpha(0);
+            object.setFrame(0);
         })
         object.on(Phaser.Input.Events.POINTER_UP, () => {
+            object.setFrame(0);
+            overlay.setAlpha(highlightAlpha);
             callback();
         });
+        object.on(Phaser.Input.Events.POINTER_DOWN, () => {
+            object.setFrame(1);
+            overlay.setAlpha(0);
+        });
+
+        object.disable = () => {
+            object.disableInteractive();
+            object.setAlpha(.5);
+            overlay.setAlpha(0);
+        }
     }
 }
