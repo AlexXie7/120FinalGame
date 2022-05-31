@@ -450,6 +450,10 @@ class UI extends Phaser.Scene {
         }
     }
 
+    getLives() {
+        return this.lives;
+    }
+
     setInstructions(text) {
         this.instructions.setText(text);
     }

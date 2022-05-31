@@ -5,9 +5,9 @@ class minigameMoviePopcorn extends Minigame {
 
     preload() {
         super.preload();
-        this.load.spritesheet('popcorn', '/assets/minigameMoviePopcorn/popcorn.png', {frameWidth: 60, frameHeight: 71});
-        this.load.image('bucket', '/assets/minigameMoviePopcorn/emptyBucket.png');
-        this.load.image('bg', '/assets/minigameMoviePopcorn/MovieBackground.png');
+        this.load.spritesheet('popcorn', './assets/minigameMoviePopcorn/popcorn.png', {frameWidth: 60, frameHeight: 71});
+        this.load.image('bucket', './assets/minigameMoviePopcorn/emptyBucket.png');
+        this.load.image('bg', './assets/minigameMoviePopcorn/MovieBackground.png');
     }
 
     create() {

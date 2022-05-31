@@ -6,11 +6,17 @@ class minigameTutorial extends Minigame {
     preload() {
         super.preload();
 
-        this.load.image('background', './assets/tutorial/background.jpg');
+        this.load.image('tutorialBackground', './assets/tutorial/background.jpg');
         this.load.image('window', './assets/tutorial/window.png');
         this.load.image('stamp', './assets/tutorial/stamp.png');
         this.load.spritesheet('paper', './assets/tutorial/paper.png', {frameWidth: 220, frameHeight: 288});
         this.load.image('paperFlat', './assets/tutorial/paper-flat.png');
+
+        this.load.audio('paper', './assets/tutorial/paper.wav');
+        this.load.audio('stamp', './assets/tutorial/stamp.wav');
+        this.load.audio('paperFlat','./assets/tutorial/paper-flat.wav');
+        // this.load.audio('crowd', './assets/tutorial/crowd.wav');
+        this.load.audio('plane', './assets/tutorial/plane.wav');
 
         // cutscene
         this.load.image('airportBackground', './assets/tutorial/airport-background.jpg');
@@ -27,7 +33,7 @@ class minigameTutorial extends Minigame {
 
         // background
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xFFE74F).setOrigin(0);
-        this.add.image(0,0,'background').setOrigin(0).setDisplaySize(game.config.width, game.config.height);
+        this.add.image(0,0,'tutorialBackground').setOrigin(0).setDisplaySize(game.config.width, game.config.height);
         this.add.image(0,0,'window').setOrigin(0).setDisplaySize(game.config.width, game.config.height).setDepth(1);
 
         this.paper = this.add.image(game.config.width - 140, game.config.height - 240,'paper',0).setOrigin(.5).setDepth(2);
@@ -71,6 +77,8 @@ class minigameTutorial extends Minigame {
         this.letterBoxBottom = this.add.rectangle(0,this.background.getBottomLeft().y,game.config.width, game.config.height, 0)
             .setOrigin(0).setDepth(5).setVisible(false);
 
+        // this.crowdSound = this.sound.add('crowd');
+
         // keep cutscene things playing on finish
         this.pauseOnFinish = false;
     }
@@ -98,9 +106,13 @@ class minigameTutorial extends Minigame {
                     this.background.setVisible(true);
                     this.plane.setVisible(true);
                     this.plane.isEnabled = true;
+                    this.sound.play('plane', {volume: 1});
                     this.foreground.setVisible(true);
                     this.letterBoxBottom.setVisible(true);
                     this.letterBoxTop.setVisible(true);
+
+                    // this.crowdSound.play({loop: true});
+                    // this.crowdSound.setVolume(0);
 
                     this.state = 'cutscene2';
                 }
@@ -118,6 +130,7 @@ class minigameTutorial extends Minigame {
                 }
                 this.plane.update(time, delta);
                 this.overlay.setAlpha(1 - progress);
+                // this.crowdSound.setVolume(progress * .5);
                 break;
             }
             case 'cutscene3': {
@@ -127,6 +140,7 @@ class minigameTutorial extends Minigame {
                     progress = 1;
                     this.finish(true);
                     this.state = 'cutscene4';
+                    // this.sound.stopAll();
                 }
                 this.plane.update(time, delta);
                 break;
@@ -192,6 +206,12 @@ class minigameTutorial extends Minigame {
         object.setInteractive({
             draggable: true
         });
+        object.on(Phaser.Input.Events.DRAG_START, (pointer) => {
+            if (object.state !== 'start') {
+                return;
+            }
+            this.sound.play('paper', {volume: 1});
+        });
         object.on(Phaser.Input.Events.DRAG, (pointer) => {
             if (object.state !== 'start') {
                 return;
@@ -208,9 +228,13 @@ class minigameTutorial extends Minigame {
                 object.targetX = this.targetPoint.x;
                 object.targetY = this.targetPoint.y;
                 // gave paper once
+                this.sound.play('paperFlat', {volume: 1});
                 object.state = 'give';
                 await this.stamp.setTargetPosition(this.paper.targetX + 50, this.paper.targetY - 200);
+                // stamp pos
                 await this.stamp.setTargetPosition(this.paper.targetX + 50, this.paper.targetY - 40);
+                // on stamp pos
+                this.sound.play('stamp', {volume: 2});
                 this.uiScene.createSuccess(this.stamp.x, this.stamp.y);
                 await this.stamp.setTargetPosition(this.paper.targetX + 50, this.paper.targetY - 200);
                 object.setFrame(1);

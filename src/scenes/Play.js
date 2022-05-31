@@ -62,7 +62,7 @@ class Play extends Phaser.Scene {
     }
 
     // creates the map with zones
-    createWorld() {
+    async createWorld() {
 
         // game mode
         this.mode = 'auto'; // use 'free' to pick
@@ -188,8 +188,6 @@ class Play extends Phaser.Scene {
             }
         }
 
-        this.mapCreated = true;
-
         this.playerScale = this.map.scale*.2;
         this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player').setScale(this.playerScale).setOrigin(.5, 1);
 
@@ -203,11 +201,13 @@ class Play extends Phaser.Scene {
         this.isWalking = false;
         this.location = undefined;
 
+        this.mapCreated = true;
+
 
         // play bgm
         // makes sure that the original and asian ver play at the same time
-        this.bgmAsian = this.sound.add('bgmAsian', {volume: .5});
-        this.bgmOriginal = this.sound.add('bgmOriginal', {loop: true,volume: .5})
+        this.bgmAsian = this.sound.add('bgmAsian', {volume: 0});
+        this.bgmOriginal = this.sound.add('bgmOriginal', {loop: true,volume: 1})
             .on(Phaser.Sound.Events.LOOPED, () => this.bgmAsian.play());
         this.bgmOriginal.play();
         this.bgmAsian.play();
@@ -216,18 +216,37 @@ class Play extends Phaser.Scene {
         this.minigameTimeLimit = 10000;
 
         
-        new Timer().start(1000, () => {
-            if (this.mode === 'auto') {
-                // set started to true
-                this.isStarted = true;
+        await new Promise((resolve, reject) => {
+            new Timer().start(500, resolve);
+        });
 
-                this.walkToRandomZone((zone) => {
-                    console.log('first mingame start')
-                    const minigameName = zone.getRandomMinigame();
-                    this.launchMinigame(minigameName, this.minigameTimeLimit);
-                });
-            }
-        })
+        for(const zone of Object.values(this.zones)) {
+            await new Promise((resolve, reject) => {
+                new Timer().start(100, resolve);
+            });
+            const x = gameCenterX + Math.sign(zone.sprite.x - gameCenterX) * 400;
+            const y = gameCenterY + Math.sign(zone.sprite.y - gameCenterY) * 260;
+            this.uiScene.createBubble(x, y, zone.name, {
+                stemSide: y > gameCenterY ? 'top' : 'bottom',
+                stemSlide: x > gameCenterX ? 1 : 0,
+                destroyTime: 200
+            });
+        }
+
+        await new Promise((resolve, reject) => {
+            new Timer().start(1000, resolve);
+        });
+
+        if (this.mode === 'auto') {
+            // set started to true
+            this.isStarted = true;
+
+            this.walkToRandomZone((zone) => {
+                console.log('first mingame start')
+                const minigameName = zone.getRandomMinigame();
+                this.launchMinigame(minigameName, this.minigameTimeLimit);
+            });
+        }
     }
 
     update(time, delta) {
@@ -343,6 +362,7 @@ class Play extends Phaser.Scene {
         this.uiScene.overlay.setAlpha(0);
 
         // stop the minigame scene
+        this.scene.pause(scene);
         this.scene.stop(scene);
 
         // open doors to map
@@ -350,6 +370,38 @@ class Play extends Phaser.Scene {
         this.uiScene.showLives();
         if (!result) {
             this.uiScene.removeLife();
+            switch (this.uiScene.getLives()) {
+                case 4: {
+                    this.bgmAsian.setVolume(0);
+                    this.bgmOriginal.setVolume(1);
+                    break;
+                }
+                case 3: {
+                    this.bgmAsian.setVolume(.25);
+                    this.bgmOriginal.setVolume(1);
+                    break;
+                }
+                case 2: {
+                    this.bgmAsian.setVolume(.5);
+                    this.bgmOriginal.setVolume(1);
+                    break;
+                }
+                case 1: {
+                    this.bgmAsian.setVolume(.75);
+                    this.bgmOriginal.setVolume(0);
+                    break;
+                }
+                case 0: {
+                    this.bgmAsian.setVolume(1);
+                    this.bgmOriginal.setVolume(0);
+                    break;
+                }
+                default: {
+                    this.bgmAsian.setVolume(0);
+                    this.bgmOriginal.setVolume(1);
+                }
+            }
+            
         }
         
         // isStarted is set after tutorial finishes
