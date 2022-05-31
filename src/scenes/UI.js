@@ -688,7 +688,7 @@ class UI extends Phaser.Scene {
         }
     }
 
-    async minigameStart() {
+    async minigameStart(options = {}) {
         const instructionVisibleDuration = 1000;
         this.instructions.setVisible(true);
         // this.overlay.setAlpha(.5);
@@ -717,7 +717,9 @@ class UI extends Phaser.Scene {
             });
         });
         // console.log(this.overlay.alpha);
-        this.timerBar.setVisible(true);
+        if (!options.hideTimer) {
+            this.timerBar.setVisible(true);
+        }        
 
         return;
     }

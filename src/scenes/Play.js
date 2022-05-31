@@ -407,12 +407,14 @@ class Play extends Phaser.Scene {
         // wait for door to open
         await this.uiScene.openDoor(300);
 
-        // then start minigame and timers
-        await this.uiScene.minigameStart();
-        this.scene.resume(sceneName);
-
         // scale timer by minigame timer scale
         minigameTimeLimit *= currentMinigame.timerScale;
+
+        // then start minigame and timers
+        await this.uiScene.minigameStart({
+            hideTimer: minigameTimeLimit > 0 ? false : true
+        });
+        this.scene.resume(sceneName);        
 
         if (minigameTimeLimit > 0) {
             this.minigameTimer.start(minigameTimeLimit, () => {
