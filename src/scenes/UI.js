@@ -129,7 +129,8 @@ class UI extends Phaser.Scene {
             align: 'center',
             fontSize: '64px',
             stroke: '#000',
-            strokeThickness: 4
+            strokeThickness: 4,
+            maxLines: 1
         }
         this.instructions = this.add.text(gameCenterX, 0, 'Instructions', instructionsConfig).setOrigin(.5);
         const ins = this.instructions;
@@ -449,6 +450,10 @@ class UI extends Phaser.Scene {
         }
     }
 
+    getLives() {
+        return this.lives;
+    }
+
     setInstructions(text) {
         this.instructions.setText(text);
     }
@@ -687,7 +692,7 @@ class UI extends Phaser.Scene {
         }
     }
 
-    async minigameStart() {
+    async minigameStart(options = {}) {
         const instructionVisibleDuration = 1000;
         this.instructions.setVisible(true);
         // this.overlay.setAlpha(.5);
@@ -716,7 +721,9 @@ class UI extends Phaser.Scene {
             });
         });
         // console.log(this.overlay.alpha);
-        this.timerBar.setVisible(true);
+        if (!options.hideTimer) {
+            this.timerBar.setVisible(true);
+        }        
 
         return;
     }
@@ -756,8 +763,31 @@ class UI extends Phaser.Scene {
         return bubble;
     }
 
-    createText(x, y, text, config = {}) {
+    createText(x, y, text, config = {fontSize: '64px', stroke: '#000', strokeThickness: 4}) {
         const sign = this.add.text(x, y, text, config).setOrigin(.5);
+        let lifeTime = 1000;
+        let timer = 0;
+
+        sign.update = (time, delta) => {
+            
+            if (sign.isDestroyed) {
+                return;
+            }
+
+            let progress = timer / lifeTime;
+
+            sign.y = y - progress * 20;
+            if (progress > .5) {
+                sign.setAlpha((.5 - (progress - .5)) * 2);
+            }
+
+            if (progress >= 1) {
+                sign.destroy();
+                sign.isDestroyed = true;
+            }
+
+            timer += delta;
+        };
         this.activeSigns.push(sign);
     }
 

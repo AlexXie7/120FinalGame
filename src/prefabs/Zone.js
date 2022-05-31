@@ -33,7 +33,9 @@ class Zone {
         })
 
         // interactivity for the town sprites
-        this.sprite.setInteractive();
+        if (options.interactive) {
+            this.sprite.setInteractive();
+        }
 
         // On hover over sprite
         this.sprite.on('pointerover', () => {

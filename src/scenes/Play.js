@@ -4,7 +4,7 @@ class Play extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('map', './assets/Map.jpg');
+        this.load.image('map', './assets/map.jpg');
         this.load.image('school', './assets/School.png');
         this.load.image('town', './assets/Town.png');
         this.load.image('plaza', './assets/Plaza.png');
@@ -19,6 +19,9 @@ class Play extends Phaser.Scene {
     }
 
     create() {
+        // disable right click menu
+        game.canvas.addEventListener('contextmenu', (e) => {e.preventDefault()});
+
         // launch ui scene and move it to top
         this.scene.launch('uiScene');
         this.scene.bringToTop('uiScene');
@@ -34,6 +37,9 @@ class Play extends Phaser.Scene {
             this.createWorld();
             return;
         }
+
+        // bool of whether the game is started. set after tutorial is finished / world is created
+        this.isStarted = false;
 
 
         this.uiScene.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
@@ -56,9 +62,14 @@ class Play extends Phaser.Scene {
     }
 
     // creates the map with zones
-    createWorld() {
-        this.map = this.add.sprite(gameCenterX, gameCenterY,'map').setDisplaySize(game.scale.width, game.scale.height);
-       
+    async createWorld() {
+
+        // game mode
+        this.mode = 'auto'; // use 'free' to pick
+
+        this.map = this.add.sprite(gameCenterX, gameCenterY,'map');
+        this.map.setScale(Math.max(game.config.width / this.map.width, game.config.height / this.map.height));
+
         //road waypoints 
         this.centerRoad  = this.add.rectangle(gameCenterX*1.03, gameCenterY*1.1, 5, 5, 0x000000);
         this.centerLeft  = this.add.rectangle(gameCenterX*.88, gameCenterY*.93, 5, 5, 0x000000);
@@ -73,7 +84,7 @@ class Play extends Phaser.Scene {
         this.zones = {
             'school': new Zone(this, gameCenterX * 1.63, gameCenterY * 1.7, 'school', {
                 minigames: Array.from(minigameNames['school']),
-                sprite: this.add.sprite(gameCenterX * 1.63, gameCenterY*1.18, 'school').setScale(this.map.scale*.9),
+                sprite: this.add.sprite(gameCenterX * 1.55, gameCenterY*1.3, 'school').setScale(this.map.scale*.7),
                 rotation: 0,
                 scale: this.map.scale*.9,
                 playing: false,
@@ -81,15 +92,14 @@ class Play extends Phaser.Scene {
             }),
             'home': new Zone(this, gameCenterX * .5, gameCenterY * 1.7, 'home', {
                 minigames: Array.from(minigameNames['home']),
-                sprite: this.add.sprite(gameCenterX * .5, gameCenterY * 1.33, 'home').setScale(this.map.scale*.85),
-                rotation: 0,
+                sprite: this.add.sprite(gameCenterX * .4, gameCenterY * 1.33, 'home').setScale(this.map.scale*1.2),rotation: 0,
                 scale: this.map.scale*.85,
                 playing: false,
                 pathToCenter: [this.homeRoad, this.bottomMid, this.centerRoad]
             }),
             'plaza': new Zone(this, gameCenterX * .73, gameCenterY * .93, 'plaza', {
                 minigames: Array.from(minigameNames['plaza']),
-                sprite: this.add.sprite(gameCenterX * .73, gameCenterY * .5, 'plaza').setScale(this.map.scale*.85),
+                sprite: this.add.sprite(gameCenterX * .5, gameCenterY * .65, 'plaza'),
                 rotation: 0,
                 scale: this.map.scale*.85,
                 playing: false,
@@ -97,7 +107,7 @@ class Play extends Phaser.Scene {
             }),
             'town': new Zone(this, gameCenterX * 1.8, gameCenterY * .94, 'town', {
                 minigames: Array.from(minigameNames['town']),
-                sprite: this.add.sprite(gameCenterX * 1.5, gameCenterY * .6, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
+                sprite: this.add.sprite(gameCenterX * 1.2, gameCenterY * .7, 'town').setScale(this.map.scale*.8).setOrigin(.2,.5),
                 rotation: 0,
                 scale: this.map.scale*.8,
                 playing: false,
@@ -107,6 +117,11 @@ class Play extends Phaser.Scene {
 
         for(const zone of Object.values(this.zones)){
             
+            // only make interactive if mode is free
+            if (this.mode === 'free') {
+                zone.sprite.setInteractive();
+            }
+
             zone.clickCallback = () => {
                 if(this.location === zone.name){
 
@@ -173,8 +188,6 @@ class Play extends Phaser.Scene {
             }
         }
 
-        this.mapCreated = true;
-
         this.playerScale = this.map.scale*.2;
         this.player = this.add.follower(null, gameCenterX, gameCenterY, 'player').setScale(this.playerScale).setOrigin(.5, 1);
 
@@ -188,21 +201,52 @@ class Play extends Phaser.Scene {
         this.isWalking = false;
         this.location = undefined;
 
-        // this.walkTo('school');
-        //this.walkToSchool();
-        //console.log(this.school.sprite.x);
+        this.mapCreated = true;
 
-        
 
         // play bgm
         // makes sure that the original and asian ver play at the same time
-        this.bgmAsian = this.sound.add('bgmAsian', {volume: .5});
-        this.bgmOriginal = this.sound.add('bgmOriginal', {loop: true,volume: .5})
+        this.bgmAsian = this.sound.add('bgmAsian', {volume: 0});
+        this.bgmOriginal = this.sound.add('bgmOriginal', {loop: true,volume: 1})
             .on(Phaser.Sound.Events.LOOPED, () => this.bgmAsian.play());
         this.bgmOriginal.play();
         this.bgmAsian.play();
         
         
+        this.minigameTimeLimit = 10000;
+
+        
+        await new Promise((resolve, reject) => {
+            new Timer().start(500, resolve);
+        });
+
+        for(const zone of Object.values(this.zones)) {
+            await new Promise((resolve, reject) => {
+                new Timer().start(100, resolve);
+            });
+            const x = gameCenterX + Math.sign(zone.sprite.x - gameCenterX) * 400;
+            const y = gameCenterY + Math.sign(zone.sprite.y - gameCenterY) * 260;
+            this.uiScene.createBubble(x, y, zone.name, {
+                stemSide: y > gameCenterY ? 'top' : 'bottom',
+                stemSlide: x > gameCenterX ? 1 : 0,
+                destroyTime: 200
+            });
+        }
+
+        await new Promise((resolve, reject) => {
+            new Timer().start(1000, resolve);
+        });
+
+        if (this.mode === 'auto') {
+            // set started to true
+            this.isStarted = true;
+
+            this.walkToRandomZone((zone) => {
+                console.log('first mingame start')
+                const minigameName = zone.getRandomMinigame();
+                this.launchMinigame(minigameName, this.minigameTimeLimit);
+            });
+        }
     }
 
     update(time, delta) {
@@ -216,7 +260,17 @@ class Play extends Phaser.Scene {
         
     }
 
-    walkTo(zone){
+    walkToRandomZone(callback = () => {}) {
+
+        // add logic to choose zone based on minigame availability
+        // so that each zone is finished at the same time
+
+        const zones = Object.values(this.zones);
+        const zone = zones[Math.floor(Math.random() * zones.length)];
+        this.walkTo(zone, callback);
+    }
+
+    walkTo(zone, callback = () => {}){
         let walkPath = this.add.path(this.player.x, this.player.y);
 
         console.log(zone.pathToCenter);
@@ -256,12 +310,14 @@ class Play extends Phaser.Scene {
         this.player.play('walk');
         this.isWalking = true;
 
+        const walkDuration = 1000;
+
         this.player.path = walkPath;
         this.player.startFollow({
             from: 0,
             to: 1,
             delay: 0,
-            duration: 1000,
+            duration: walkDuration,
             ease: 'Quad.easeInOut',
             hold: 0,
             //flipX: true,
@@ -271,10 +327,11 @@ class Play extends Phaser.Scene {
         });
 
 
-        new Timer().start(1000, () => {
+        new Timer().start(walkDuration, () => {
             this.isWalking = false;
             this.location = zone.name;
             this.player.stop(null, true);
+            callback(zone);
         });
 
 
@@ -305,19 +362,64 @@ class Play extends Phaser.Scene {
         this.uiScene.overlay.setAlpha(0);
 
         // stop the minigame scene
+        this.scene.pause(scene);
         this.scene.stop(scene);
 
         // open doors to map
-        this.uiScene.openDoor(300);
+        await this.uiScene.openDoor(300);
         this.uiScene.showLives();
         if (!result) {
             this.uiScene.removeLife();
+            switch (this.uiScene.getLives()) {
+                case 4: {
+                    this.bgmAsian.setVolume(0);
+                    this.bgmOriginal.setVolume(1);
+                    break;
+                }
+                case 3: {
+                    this.bgmAsian.setVolume(.25);
+                    this.bgmOriginal.setVolume(1);
+                    break;
+                }
+                case 2: {
+                    this.bgmAsian.setVolume(.5);
+                    this.bgmOriginal.setVolume(1);
+                    break;
+                }
+                case 1: {
+                    this.bgmAsian.setVolume(.75);
+                    this.bgmOriginal.setVolume(0);
+                    break;
+                }
+                case 0: {
+                    this.bgmAsian.setVolume(1);
+                    this.bgmOriginal.setVolume(0);
+                    break;
+                }
+                default: {
+                    this.bgmAsian.setVolume(0);
+                    this.bgmOriginal.setVolume(1);
+                }
+            }
+            
         }
         
-        // reenable interactivity
-        if (this.mapCreated) {
-            for(const zone of Object.values(this.zones)){
-                zone.sprite.setInteractive();
+        // isStarted is set after tutorial finishes
+        if (this.mapCreated && this.isStarted) {
+
+            if (this.mode === 'free') {
+                // reenable interactivity
+                for(const zone of Object.values(this.zones)){
+                    zone.sprite.setInteractive();
+                }
+            } else if (this.mode === 'auto') {
+                // automatically go to next minigame
+                this.walkToRandomZone((zone) => {
+                    console.log('minigame end start new min')
+
+                    const minigameName = zone.getRandomMinigame();
+                    this.launchMinigame(minigameName, this.minigameTimeLimit);
+                });
             }
         }
     }
@@ -337,21 +439,34 @@ class Play extends Phaser.Scene {
 
         // get the minigame scene and check for the create event
         const currentMinigame = this.scene.get(sceneName);
-        currentMinigame.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
-            this.scene.pause(sceneName);
-        })
+        
 
-        // launch minigame
-        this.scene.launch(sceneName);
-        this.scene.bringToTop(sceneName);
-        this.scene.bringToTop('uiScene'); // move UI scene to the top
+        await new Promise((resolve, reject) => {
+
+            currentMinigame.sys.events.once(Phaser.Scenes.Events.CREATE, () => {
+                this.scene.pause(sceneName);
+                resolve();
+            })
+
+            // launch minigame
+            this.scene.launch(sceneName);
+            this.scene.bringToTop(sceneName);
+            this.scene.bringToTop('uiScene'); // move UI scene to the top
+
+        })
+        
 
         // wait for door to open
         await this.uiScene.openDoor(300);
 
+        // scale timer by minigame timer scale
+        minigameTimeLimit *= currentMinigame.timerScale;
+
         // then start minigame and timers
-        await this.uiScene.minigameStart();
-        this.scene.resume(sceneName);
+        await this.uiScene.minigameStart({
+            hideTimer: minigameTimeLimit > 0 ? false : true
+        });
+        this.scene.resume(sceneName);        
 
         if (minigameTimeLimit > 0) {
             this.minigameTimer.start(minigameTimeLimit, () => {

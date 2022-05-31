@@ -5,11 +5,11 @@ class minigameGiveWater extends Minigame {
 
     preload() {
         super.preload();
-        this.load.image('bg', '/assets/minigameGiveWater/fieldBackground.png');
-        this.load.image('water', '/assets/minigameGiveWater/fieldBackground.png');
-        this.load.image('towel', '/assets/minigameGiveWater/fieldBackground.png');
-        this.load.image('waterbox', '/assets/minigameGiveWater/fieldBackground.png');
-        this.load.image('towelbox', '/assets/minigameGiveWater/fieldBackground.png');
+        this.load.image('bg', './assets/minigameGiveWater/fieldBackground.png');
+        this.load.image('water', './assets/minigameGiveWater/fieldBackground.png');
+        this.load.image('towel', './assets/minigameGiveWater/fieldBackground.png');
+        this.load.image('waterbox', './assets/minigameGiveWater/fieldBackground.png');
+        this.load.image('towelbox', './assets/minigameGiveWater/fieldBackground.png');
     }
 
     create() {
