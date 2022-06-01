@@ -7,7 +7,7 @@ class minigamePlantFlags extends Minigame {
         super.preload();
 
         this.load.image('house','./assets/minigamePlantFlags/house.png');
-        this.load.image('background','./assets/minigameTownSpeed/background.png');
+        this.load.image('plantFlagBackground','./assets/minigameTownSpeed/background.png');
         this.load.image('plantFlag','./assets/minigamePlantFlags/plant-flag.png');
     }
 
@@ -19,7 +19,7 @@ class minigamePlantFlags extends Minigame {
 
         // background
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xEECCFF).setOrigin(0);
-        this.add.image(0,0,'background').setOrigin(0).setDisplaySize(game.config.width, game.config.height);
+        this.add.image(0,0,'plantFlagBackground').setOrigin(0).setDisplaySize(game.config.width, game.config.height);
 
         // grass?
         this.add.rectangle(0,gameCenterY,game.config.width, game.config.height, 0x3C5B13).setOrigin(0);
