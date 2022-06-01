@@ -59,6 +59,13 @@ class Zone {
             console.log('Clicked the ' + this.name);
             this.clickCallback(this)
         });
+
+        this.needsReset = false;
+    }
+
+    resetMinigames() {
+        this.minigames = Array.from(minigameNames[this.name]);
+        this.needsReset = false;
     }
 
     // returns random minigame name from this.minigames
@@ -66,7 +73,7 @@ class Zone {
     getRandomMinigame(removeMinigame = true) {
         // reset minigame array if empty
         if (this.minigames.length === 0) {
-            this.minigames = Array.from(minigameNames[this.name]);
+            this.resetMinigames();
         }
 
         const index = Math.floor(Math.random() * this.minigames.length);
@@ -74,6 +81,13 @@ class Zone {
         if (removeMinigame) {
             this.minigames.splice(index, 1);
         }
+        if (this.minigames.length === 0) {
+            this.needsReset = true;
+        }
         return minigameName;
+    }
+
+    getMinigameCount() {
+        return this.minigames.length;
     }
 }

@@ -109,6 +109,7 @@ class UI extends Phaser.Scene {
                     progress = 1;
                     ov.state = 'none';
                     ov.setAlpha(ov.targetAlpha);
+                    ov.callback();
                     return;
                 }
                 ov.setAlpha(ov.startAlpha + progress * (ov.targetAlpha - ov.startAlpha));
@@ -116,12 +117,13 @@ class UI extends Phaser.Scene {
                 ov.timer += delta;
             }
         }
-        ov.moveAlpha = (alpha, duration = 200) => {
+        ov.moveAlpha = (alpha, duration = 200, callback = () => {}) => {
             ov.targetAlpha = alpha;
             ov.startAlpha = ov.alpha;
             ov.duration = duration;
             ov.timer = 0;
             ov.state = 'transform';
+            ov.callback = callback;
         }
 
         // instructions at the top

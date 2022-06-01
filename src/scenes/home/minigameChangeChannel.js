@@ -85,6 +85,7 @@ class minigameChangeChannel extends Minigame {
         this.powerButton.pressedTint = 0xFF5E5E;
         this.powerButton.hoveredTint = 0xFF9B9B;
         this.powerButton.onPressed = () => {
+            this.sound.play('buttonDown');
             if (this.tvOn) {
                 this.tvOn = false;
                 this.overlay.setVisible(true);
@@ -99,6 +100,7 @@ class minigameChangeChannel extends Minigame {
         this.channelLeftButton.pressedTint = 0x009B45;
         this.channelLeftButton.hoveredTint = 0x00FF6E;
         this.channelLeftButton.onPressed = () => {
+            this.sound.play('buttonDown');
             if (!this.tvOn) { return; }
             this.channel -= 1;
             if (this.channel <= 0) {
@@ -111,6 +113,7 @@ class minigameChangeChannel extends Minigame {
         this.channelRightButton.pressedTint = 0x009B45;
         this.channelRightButton.hoveredTint = 0x00FF6E;
         this.channelRightButton.onPressed = () => {
+            this.sound.play('buttonDown');
             if (!this.tvOn) { return; }
             this.channel += 1;
             if (this.channel >= this.channels.length) {

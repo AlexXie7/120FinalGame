@@ -111,7 +111,7 @@ class minigameCarStickers extends Minigame {
             this.scoreText.setColor('#f00');
         }
 
-        if (this.score > this.targetScore) {
+        if (this.score >= this.targetScore) {
             this.isPassed = true;
             // consider finishing immediately
         } else {

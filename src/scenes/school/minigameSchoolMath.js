@@ -143,6 +143,8 @@ class minigameSchoolMath extends Minigame {
 
     // finish function override
     finish() {
+        this.chalk.soundSlide.stop();
+
         // process current strokes
         this.requestHandwritingRecognition(this.ink, (data) => {
             if (data) {
