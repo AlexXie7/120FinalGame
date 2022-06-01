@@ -54,11 +54,10 @@ class minigamePickFood extends Minigame {
             if(!this.clicked){
                 this.clicked = true;
                 this.isPassed = true;
-
-                // immediately finishes
-                // change if you want mr alex
-                this.finish(true);
-            }   
+            }
+            // immediately finishes
+            // change if you want mr alex
+            this.finish(true);
         });
 
         this.wrong.on('pointerup', () => {
@@ -66,11 +65,10 @@ class minigamePickFood extends Minigame {
             if(!this.clicked){
                 this.clicked = true;
                 this.isPassed = false;
-
-                // immediately finishes
-                // change if you want mr alex
-                this.finish(false);
-            }            
+            }
+            // immediately finishes
+            // change if you want mr alex
+            this.finish(false);
         });
 
         
