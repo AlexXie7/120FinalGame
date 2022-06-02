@@ -468,7 +468,7 @@ class Play extends Phaser.Scene {
                     this.scene.stop('playScene');
 
                     // go to ending scene (temp menu scene)
-                    this.scene.start('menuScene');
+                    this.scene.start('gameOverScene');
                 });
             });
 

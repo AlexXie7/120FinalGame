@@ -10,8 +10,12 @@ class Timer {
         this.isActive = false;
         this.isFinished = true;
         this.callbacks = options.callbacks || [];
+        this.updateCallbacks = [];
         if (options.callback) {
             this.callbacks.push(callback);
+        }
+        if (options.updateCallback) {
+            this.updateCallbacks.push(updateCallback);
         }
     }
 
@@ -31,17 +35,24 @@ class Timer {
                 }
             }
 
+            for (const callback of this.updateCallbacks) {
+                callback(time, delta, this);
+            }
+
             this.timer += delta;
         }
     }
     // starts timer from beginning
-    start(duration, callback) {
+    start(duration, finishCallback, updateCallback) {
         this.lifeTime = duration || this.lifeTime;
         this.isFinished = false;
         this.isActive = true;
         this.timer = 0;
-        if (callback) {
-            this.callbacks.push(callback);
+        if (finishCallback) {
+            this.callbacks.push(finishCallback);
+        }
+        if (updateCallback) {
+            this.updateCallbacks.push(updateCallback);
         }
         Timer.timers.push(this);
         return this;

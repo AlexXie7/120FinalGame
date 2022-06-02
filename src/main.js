@@ -37,7 +37,7 @@ const config = {
         // width: window.innerWidth * window.devicePixelRatio,
         // height: window.innerHeight * window.devicePixelRatio
     },
-    scene: [Menu, Play, Minigame, minigameTutorial, UI].concat(minigameClasses), // adds minigameClasses to the scene list
+    scene: [Menu, Play, Minigame, minigameTutorial, GameOver, UI].concat(minigameClasses), // adds minigameClasses to the scene list
 };
 
 
