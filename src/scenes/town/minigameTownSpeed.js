@@ -15,7 +15,8 @@ class minigameTownSpeed extends Minigame {
         this.load.image('gasPedal', './assets/minigameTownSpeed/gas-pedal.png');
         this.load.image('speedometer', './assets/minigameTownSpeed/speedometer-ranged.png');
         this.load.image('speedometerHand', './assets/minigameTownSpeed/speedometer-hand.png');
-        this.load.image('townSpeedBackground', './assets/minigameTownSpeed/background.png');
+        // this.load.image('townSpeedBackground', './assets/minigameTownSpeed/background.png');
+        this.mload('image', 'background', './assets/minigameTownSpeed/background.png')
     }
 
     create() {
@@ -24,7 +25,7 @@ class minigameTownSpeed extends Minigame {
 
         // bg
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0x66BABB).setOrigin(0);
-        const bg = this.add.image(0,0,'townSpeedBackground').setOrigin(0)
+        const bg = this.add.image(0,0,this.mkey('background')).setOrigin(0)
         bg.setScale(game.config.width / bg.width, game.config.height / bg.height);
 
         this.road = this.add.sprite(gameCenterX, gameCenterY, 'roadSheet', 0);
