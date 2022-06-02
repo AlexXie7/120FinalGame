@@ -30,6 +30,9 @@ class minigameMoviePopcorn extends Minigame {
             },
             //loop: 1,
             paused: true,
+            onComplete: () => {
+                this.finish(true);
+            }
         })
 
         this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
@@ -76,7 +79,7 @@ class minigameMoviePopcorn extends Minigame {
         // this.finish(true); // true if success, false if failure
 
         // or simply set isPassed to true or false if the state of the minigame is a success or failure
-        this.isPassed = true;
+        // this.isPassed = true;
     }
 
     onTimeout() {

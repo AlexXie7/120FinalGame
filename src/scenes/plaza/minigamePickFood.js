@@ -15,7 +15,7 @@ class minigamePickFood extends Minigame {
 
         // Right foods (Only Sandwich and water)
         this.load.image('sandwich', './assets/minigamePickFood/tempSandwich.png');
-        this.load.image('pickFoodWater', './assets/minigamePickFood/tempWater.png');
+        this.load.image('water', './assets/minigamePickFood/tempWater.png');
     }
 
     create() {
@@ -31,7 +31,7 @@ class minigamePickFood extends Minigame {
         this.clicked = false;
 
         this.wrongFood = ['boba', 'dumpling', 'ramen', 'sushi'];
-        this.rightFood = ['sandwich', 'pickFoodWater'];
+        this.rightFood = ['sandwich', 'water'];
 
         this.foodA = this.wrongFood[Math.floor(Math.random()*this.wrongFood.length)];
         this.foodB = this.rightFood[Math.floor(Math.random()*this.rightFood.length)];
@@ -53,22 +53,16 @@ class minigamePickFood extends Minigame {
             this.uiScene.createSuccess(this.pointer.x, this.pointer.y);
             if(!this.clicked){
                 this.clicked = true;
-                this.isPassed = true;
-            }
-            // immediately finishes
-            // change if you want mr alex
-            this.finish(true);
+                this.finish(true);
+            }   
         });
 
         this.wrong.on('pointerup', () => {
             this.uiScene.createFailure(this.pointer.x, this.pointer.y);
             if(!this.clicked){
                 this.clicked = true;
-                this.isPassed = false;
-            }
-            // immediately finishes
-            // change if you want mr alex
-            this.finish(false);
+                this.finish(false);
+            }            
         });
 
         
