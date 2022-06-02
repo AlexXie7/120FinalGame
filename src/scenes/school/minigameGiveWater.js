@@ -5,8 +5,8 @@ class minigameGiveWater extends Minigame {
 
     preload() {
         super.preload();
-        this.load.image('bg', './assets/minigameGiveWater/fieldBackground.png');
-        this.load.image('water', './assets/minigameGiveWater/bottle.png');
+        this.load.image('giveWaterBackground', './assets/minigameGiveWater/fieldBackground.png');
+        this.load.image('bottle', './assets/minigameGiveWater/bottle.png');
         this.load.image('towel', './assets/minigameGiveWater/towel.png');
         this.load.image('waterbox', './assets/minigameGiveWater/waterbox.png');
         this.load.image('towelbox', './assets/minigameGiveWater/towelbox.png');
@@ -27,7 +27,7 @@ class minigameGiveWater extends Minigame {
         this.towelBox = this.add.sprite(gameCenterX*.25, gameCenterY*1.75, 'towelbox');
         this.waterBox = this.add.sprite(gameCenterX*1.75,gameCenterY*1.75, 'waterbox');
 
-        this.bg = this.add.image(0, 0, 'bg').setOrigin(0).setDepth(-2);
+        this.bg = this.add.image(0, 0, 'giveWaterBackground').setOrigin(0).setDepth(-2);
         this.bg.setScale(
             game.config.width / this.bg.width,
             game.config.height / this.bg.height
@@ -59,7 +59,7 @@ class minigameGiveWater extends Minigame {
         }
 
         this.towel = this.add.sprite(this.towelBox.x, this.towelBox.y, 'towel').setScale(2);
-        this.water = this.add.sprite(this.waterBox.x, this.waterBox.y, 'water').setScale(4);
+        this.water = this.add.sprite(this.waterBox.x, this.waterBox.y, 'bottle').setScale(4);
 
         this.towel.setInteractive();
         this.water.setInteractive();
