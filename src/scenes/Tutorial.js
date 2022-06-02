@@ -6,7 +6,9 @@ class minigameTutorial extends Minigame {
     preload() {
         super.preload();
 
-        this.load.image('tutorialBackground', './assets/tutorial/background.jpg');
+        this.mload('image', 'background', './assets/tutorial/background.jpg');
+
+        // this.load.image('tutorialBackground', './assets/tutorial/background.jpg');
         this.load.image('window', './assets/tutorial/window.png');
         this.load.image('stamp', './assets/tutorial/stamp.png');
         this.load.spritesheet('paper', './assets/tutorial/paper.png', {frameWidth: 220, frameHeight: 288});
@@ -33,7 +35,7 @@ class minigameTutorial extends Minigame {
 
         // background
         // this.add.rectangle(0,0,game.config.width, game.config.height, 0xFFE74F).setOrigin(0);
-        this.add.image(0,0,'tutorialBackground').setOrigin(0).setDisplaySize(game.config.width, game.config.height);
+        this.add.image(0,0,this.mkey('background')).setOrigin(0).setDisplaySize(game.config.width, game.config.height);
         this.add.image(0,0,'window').setOrigin(0).setDisplaySize(game.config.width, game.config.height).setDepth(1);
 
         this.paper = this.add.image(game.config.width - 140, game.config.height - 240,'paper',0).setOrigin(.5).setDepth(2);

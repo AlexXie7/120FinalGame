@@ -6,9 +6,55 @@ class Minigame extends Phaser.Scene {
         super('minigame' + id);
         this.id = id;
         console.log('constructing minigame' + id);
+        this.loadedKeys = {};
     }
 
-    preload(){
+    static loadedPaths = {}
+
+    // attempting to make a cool loading system that allows for keys to stay in minigame scope
+    mload(type, key, path, ...args) {
+        let index = type + '_' + path;
+        // console.log('checking index',index,'for cachedpathkey',Minigame.loadedPaths[index])
+        // console.log(Minigame.loadedPaths);
+        let cachedPathKey = Minigame.loadedPaths[index];
+        if (!cachedPathKey) {
+            // creates unique key
+            let mkey = Date.now().toString();
+            console.log('loading',type,key,path);
+            this.load.once(`filecomplete-${type}-${mkey}`, () => {
+                console.log('loaded and cached',key,'with type+path',index);
+                // maps type_path to unique key
+                Minigame.loadedPaths[index] = mkey;
+                // maps personal key to unique key
+                this.loadedKeys[key] = mkey;
+            })
+
+            this.load[type](mkey, path, ...args);
+            
+        } else {
+            console.log('mapping personal key',key,'with cached key',cachedPathKey);
+            this.loadedKeys[key] = cachedPathKey;
+        }
+
+    }
+
+    // get cached mapped key from key
+    mkey(key) {
+        let cachedKey = this.loadedKeys[key];
+        // if (cachedKey) {
+        //     console.log('got cached key',cachedKey);
+        // } else {
+        //     console.log('no cached key for',key);
+        // }
+        return cachedKey;
+    }
+
+    // get cached key from type and path
+    ckey(type, path) {
+        return Minigame.loadedPaths[type + '_' + path];
+    }
+
+    preload() {
         
     }
 

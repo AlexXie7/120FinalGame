@@ -4,12 +4,20 @@ class Menu extends Phaser.Scene {
     }
 
     preload() {
+        this.load.image('title','./assets/menu/title.png');
+        this.load.image('logo','./assets/menu/logo.png');
         this.load.image('menuBackground', './assets/menu/background.jpg');
         this.load.image('menuBoxBack', './assets/menu/box-back.png');
         this.load.image('menuBoxMiddle', './assets/menu/box-middle.png');
         this.load.image('menuBoxFront', './assets/menu/box-front.png');
         this.load.spritesheet('playButton', './assets/menu/play-button.png', {frameWidth: 300, frameHeight: 100});
         this.load.spritesheet('creditButton', './assets/menu/credit-button.png', {frameWidth: 300, frameHeight: 100});
+        this.load.spritesheet('exitButton', './assets/menu/exit-button.png', {frameWidth: 64, frameHeight: 64});
+
+        this.load.image('credits', './assets/menu/credits.png');
+
+        this.load.audio('buttonHover', './assets/menu/button-hover.wav');
+        this.load.audio('buttonDown', './assets/menu/button-down.wav');
     }
 
     create() {
@@ -28,23 +36,44 @@ class Menu extends Phaser.Scene {
             this.add.image(gameCenterX, gameCenterY, 'menuBoxFront').setOrigin(.5)//.setDisplaySize(game.config.width, game.config.height),
         ];
 
-        const textConfig = {
-            fontFamily: 'sans-serif',
-            fontSize: '100px', 
-            backgroundColor: '#FFF', 
-            color: '#000'
+        this.title = this.add.image(gameCenterX, gameCenterY - 200, 'title').setOrigin(.5).setScale(1.2);
+        this.logo = this.add.image(gameCenterX + 350, gameCenterY + 100, 'logo').setOrigin(.5).setScale(2);
+        this.logo.spinSpeed = 0;
+        this.logo.update = (time, delta) => {
+            this.logo.spinSpeed += (1 - this.logo.spinSpeed) * delta * .001;
+            this.logo.setAngle(this.logo.angle + this.logo.spinSpeed * delta * .01);
         }
+        this.logo.setInteractive();
+        this.logo.on(Phaser.Input.Events.POINTER_UP, () => {
+            this.logo.spinSpeed += 10;
+        });
+
+        this.credits = this.add.image(gameCenterX, gameCenterY, 'credits').setOrigin(.5).setVisible(false).setDepth(1);
+        this.exitButton = this.add.sprite(this.credits.getTopRight().x, this.credits.getTopRight().y, 'exitButton').setOrigin(.5).setDepth(1).setVisible(false);
 
         // buttons
-        this.playButton = this.add.sprite(gameCenterX, gameCenterY, 'playButton', 0).setOrigin(.5);
+        this.playButton = this.add.sprite(gameCenterX, this.title.y + 400, 'playButton', 0).setOrigin(.5);
         this.initButton(this.playButton, () => {
             this.state = 'fading';
             this.playButton.disable();
             this.creditButton.disable();
         });
-        this.creditButton = this.add.sprite(gameCenterX, gameCenterY + this.playButton.displayHeight + 20, 'creditButton', 0).setOrigin(.5);
+        this.creditButton = this.add.sprite(gameCenterX, this.playButton.y + this.playButton.displayHeight + 20, 'creditButton', 0).setOrigin(.5);
         this.initButton(this.creditButton, () => {
             // open credits
+            this.playButton.disable();
+            this.creditButton.disable();
+            this.exitButton.enable();
+            this.exitButton.setVisible(true);
+            this.credits.setVisible(true);
+        });
+
+        this.initButton(this.exitButton, () => {
+            this.exitButton.disable();
+            this.exitButton.setVisible(false);
+            this.credits.setVisible(false);
+            this.playButton.enable();
+            this.creditButton.enable();
         });
         
         this.timer = 0;
@@ -52,10 +81,12 @@ class Menu extends Phaser.Scene {
         this.state = 'none';
 
         // object to fade out before starting, buttons and logos
-        this.toFade = [this.playButton, this.creditButton];
+        this.toFade = [this.playButton, this.creditButton, this.title, this.logo];
     }
 
     update(time, delta) {
+        this.logo.update(time, delta);
+
         if (this.state === 'fading') {
             if (this.toFade.length > 0) {
                 for (let i = 0; i < this.toFade.length; i++) {
@@ -108,6 +139,7 @@ class Menu extends Phaser.Scene {
         const highlightAlpha = .5;
         object.setInteractive()
         object.on(Phaser.Input.Events.POINTER_OVER, () => {
+            this.sound.play('buttonHover', {volume: .4});
             overlay.setAlpha(highlightAlpha);
         })
         object.on(Phaser.Input.Events.POINTER_OUT, () => {
@@ -120,6 +152,7 @@ class Menu extends Phaser.Scene {
             callback();
         });
         object.on(Phaser.Input.Events.POINTER_DOWN, () => {
+            this.sound.play('buttonDown', {volume: .4});
             object.setFrame(1);
             overlay.setAlpha(0);
         });
@@ -127,6 +160,11 @@ class Menu extends Phaser.Scene {
         object.disable = () => {
             object.disableInteractive();
             object.setAlpha(.5);
+            overlay.setAlpha(0);
+        }
+        object.enable = () => {
+            object.setInteractive();
+            object.setAlpha(1);
             overlay.setAlpha(0);
         }
     }

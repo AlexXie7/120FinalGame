@@ -7,14 +7,14 @@ class minigameMoviePopcorn extends Minigame {
         super.preload();
         this.load.spritesheet('popcorn', './assets/minigameMoviePopcorn/popcorn.png', {frameWidth: 60, frameHeight: 71});
         this.load.image('bucket', './assets/minigameMoviePopcorn/emptyBucket.png');
-        this.load.image('bg', './assets/minigameMoviePopcorn/MovieBackground.png');
+        this.load.image('moviePopcornBackground', './assets/minigameMoviePopcorn/MovieBackground.png');
     }
 
     create() {
         super.create();
         this.popcorn = this.add.sprite(gameCenterX, 600, 'popcorn').setScale(5).setOrigin(.5);
         this.bucket = this.add.image(gameCenterX, 635, 'bucket').setScale(5);
-        this.bg = this.add.image(0, 0, 'bg').setOrigin(0).setDepth(-2);
+        this.bg = this.add.image(0, 0, 'moviePopcornBackground').setOrigin(0).setDepth(-2);
         this.popcornCount = 0;
         this.bucketAlpha = 1;
 

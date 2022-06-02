@@ -114,6 +114,7 @@ class Play extends Phaser.Scene {
                 pathToCenter: [this.townRoad, this.centerRight,this.centerRoad]
             })
         }
+        this.lastZone;
 
         for(const zone of Object.values(this.zones)){
             
@@ -214,6 +215,7 @@ class Play extends Phaser.Scene {
         
         
         this.minigameTimeLimit = 10000;
+        this.minigamePlayCount = 0;
 
         
         await new Promise((resolve, reject) => {
@@ -262,21 +264,62 @@ class Play extends Phaser.Scene {
 
     walkToRandomZone(callback = () => {}) {
 
-        // add logic to choose zone based on minigame availability
-        // so that each zone is finished at the same time
 
         const zones = Object.values(this.zones);
-        const zone = zones[Math.floor(Math.random() * zones.length)];
+        const priorityZones = [];
+
+        // get zone with most minigames
+        let highestCount;
+        let highestZone;
+        let secondHighestZone;
+        for (const zone of zones) {
+            if (!highestZone || zone.getMinigameCount() > highestCount) {
+                highestCount = zone.getMinigameCount();
+                secondHighestZone = highestZone;
+                highestZone = zone;
+                if (!secondHighestZone) {
+                    secondHighestZone = zone;
+                }
+            }
+        }
+
+        // if all zones need reset
+        if (highestCount === 0) {
+            for (const zone of zones) {
+                zone.resetMinigames();
+            }
+        }
+
+        for (let i = 0; i < zones.length; i++) {
+            const zone = zones[i];
+            if (zone.getMinigameCount() === highestCount && this.lastZone !== zone) {
+                priorityZones.push(zone);
+            }
+        }
+        
+
+        if (priorityZones.length === 0) {
+            priorityZones.push(secondHighestZone);
+        }
+
+        const zone = priorityZones[Math.floor(Math.random() * priorityZones.length)];
+        this.lastZone = zone;
+
+        console.log('priority zones:')
+        for (const zone of priorityZones) {
+            console.log('-',zone.name, zone.getMinigameCount());
+        }
+
         this.walkTo(zone, callback);
     }
 
     walkTo(zone, callback = () => {}){
         let walkPath = this.add.path(this.player.x, this.player.y);
 
-        console.log(zone.pathToCenter);
+        // console.log(zone.pathToCenter);
 
         let flippedPath = [...zone.pathToCenter];
-        console.log(flippedPath);
+        // console.log(flippedPath);
         flippedPath.reverse();
 
         if (this.location == 'school' || this.location == 'town'){
@@ -288,9 +331,9 @@ class Play extends Phaser.Scene {
         // console.log(this.location)
 
         if(this.location){
-            console.log(this.location, this.zones)
+            // console.log(this.location, this.zones)
             for(const w of this.zones[this.location].pathToCenter){
-                console.log(w);
+                // console.log(w);
                 walkPath.lineTo(w.x, w.y);
             }
         }
@@ -305,7 +348,7 @@ class Play extends Phaser.Scene {
             walkPath.lineTo(w.x, w.y);
         }
 
-        console.log(walkPath);
+        // console.log(walkPath);
         // walkPath.lineTo(zone.x, zone.y); 
         this.player.play('walk');
         this.isWalking = true;
@@ -343,6 +386,7 @@ class Play extends Phaser.Scene {
         // clearTimeout(this.minigameTimeout);
         this.minigameTimer.stop();
         console.log('finished - closing minigame - minigame result:', result);
+        this.minigamePlayCount += 1;
 
         // pause minigame if minigame permits it
         if (scene.pauseOnFinish) {
@@ -387,8 +431,8 @@ class Play extends Phaser.Scene {
                     break;
                 }
                 case 1: {
-                    this.bgmAsian.setVolume(.75);
-                    this.bgmOriginal.setVolume(0);
+                    this.bgmAsian.setVolume(1);
+                    this.bgmOriginal.setVolume(.5);
                     break;
                 }
                 case 0: {
@@ -403,6 +447,33 @@ class Play extends Phaser.Scene {
             }
             
         }
+
+        if (this.uiScene.getLives() === 0) {
+
+            console.log('no more lives, game over');
+            this.uiScene.createText(gameCenterX, gameCenterY, 'GAME OVER', {
+                fontSize: '100px',
+                fontFamily: 'sans-serif',
+                stroke: '#000',
+                strokeThickness: 5,
+                color: '#f00'
+            })
+            this.bgmOriginal.stop();
+            this.bgmAsian.stop();
+            new Timer().start(1000, () => {
+                // start fade out
+                this.uiScene.overlay.moveAlpha(1, 1000, () => {
+                    // stop ui and play scene and such
+                    this.scene.stop('uiScene');
+                    this.scene.stop('playScene');
+
+                    // go to ending scene (temp menu scene)
+                    this.scene.start('menuScene');
+                });
+            });
+
+            return;
+        }
         
         // isStarted is set after tutorial finishes
         if (this.mapCreated && this.isStarted) {
@@ -413,6 +484,22 @@ class Play extends Phaser.Scene {
                     zone.sprite.setInteractive();
                 }
             } else if (this.mode === 'auto') {
+
+                // decrements minigame timelimit
+                if (this.minigamePlayCount >= 10) {
+                    this.minigameTimeLimit *= .9;
+                    this.minigamePlayCount = 0;
+                    this.uiScene.createText(gameCenterX, gameCenterY, 'SPEED UP!', {
+                        fontSize: '100px',
+                        fontFamily: 'sans-serif',
+                        stroke: '#000',
+                        strokeThickness: 5,
+                        color: '#ff0'
+                    });
+
+                    await new Promise((resolve, reject) => {new Timer().start(500, resolve)});
+                }
+
                 // automatically go to next minigame
                 this.walkToRandomZone((zone) => {
                     console.log('minigame end start new min')
