@@ -8,14 +8,14 @@ class minigamePickFood extends Minigame {
         super.preload();
 
         // Wrong foods (Way more)
-        this.load.image('boba', './assets/minigamePickFood/tempBoba.jpg');
-        this.load.image('dumpling', './assets/minigamePickFood/tempDumpling.jpg');
-        this.load.image('ramen', './assets/minigamePickFood/tempRamen.png');
-        this.load.image('sushi', './assets/minigamePickFood/tempSushi.png');
+        this.load.image('boba', './assets/minigamePickFood/boba.jpg');
+        this.load.image('dumpling', './assets/minigamePickFood/dumpling.jpg');
+        this.load.image('ramen', './assets/minigamePickFood/ramen.png');
+        this.load.image('sushi', './assets/minigamePickFood/sushi.png');
 
         // Right foods (Only Sandwich and water)
-        this.load.image('sandwich', './assets/minigamePickFood/tempSandwich.png');
-        this.load.image('water', './assets/minigamePickFood/tempWater.png');
+        this.load.image('sandwich', './assets/minigamePickFood/sandwich.png');
+        this.load.image('water', './assets/minigameGiveWater/bottle.png');
     }
 
     create() {
