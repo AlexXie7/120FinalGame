@@ -17,6 +17,8 @@ class minigameGiveWater extends Minigame {
     create() {
         super.create();
         
+        this.uiScene.setInstructions('Hand out supplies!');
+
         this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
             gameObject.y = dragY;
