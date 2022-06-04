@@ -60,6 +60,6 @@ const eventEmitter = new Phaser.Events.EventEmitter();
 
 
 // if true, skip to tutorial with no menu
-const DEBUG_SKIP_MENU = false;
+const DEBUG_SKIP_MENU = true;
 // if true, skip to play scene with no tutorial
-const DEBUG_SKIP_TUTORIAL = false;
+const DEBUG_SKIP_TUTORIAL = true;
