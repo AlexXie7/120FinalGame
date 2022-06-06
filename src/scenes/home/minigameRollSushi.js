@@ -13,13 +13,13 @@ class minigameRollSushi extends Minigame {
 
         this.load.image('arrowUp', './assets/minigameRollSushi/tempArrowUp.png');
         
-        this.load.image('sushiMat', '/assets/minigameRollSushi/SushiMat.png');
-        this.load.image('seaweed', '/assets/minigameRollSushi/Seaweed.png');
-        this.load.spritesheet('rice', '/assets/minigameRollSushi/riceSprite.png', {frameWidth: 620, frameHeight: 371});
-        this.load.image('pb', '/assets/minigameRollSushi/PeanutButter.png');
-        this.load.image('jelly', '/assets/minigameRollSushi/Jelly.png');
-        this.load.image('jellySpread', '/assets/minigameRollSushi/jellySpread.png');
-        this.load.image('pbSpread', '/assets/minigameRollSushi/pbSpread.png');
+        this.load.image('sushiMat', './assets/minigameRollSushi/SushiMat.png');
+        this.load.image('seaweed', './assets/minigameRollSushi/Seaweed.png');
+        this.load.spritesheet('rice', './assets/minigameRollSushi/riceSprite.png', {frameWidth: 620, frameHeight: 371});
+        this.load.image('pb', './assets/minigameRollSushi/PeanutButter.png');
+        this.load.image('jelly', './assets/minigameRollSushi/Jelly.png');
+        this.load.image('jellySpread', './assets/minigameRollSushi/jellySpread.png');
+        this.load.image('pbSpread', './assets/minigameRollSushi/pbSpread.png');
     }
 
     create() {
