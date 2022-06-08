@@ -11,7 +11,7 @@ class minigameRollSushi extends Minigame {
     preload() {
         super.preload();
 
-        this.load.image('arrowUp', './assets/minigameRollSushi/tempArrowUp.png');
+        this.load.image('arrowUp', './assets/minigameRollSushi/arrowUp.png');
         
         this.load.image('sushiMat', './assets/minigameRollSushi/SushiMat.png');
         this.load.image('seaweed', './assets/minigameRollSushi/Seaweed.png');
@@ -36,7 +36,7 @@ class minigameRollSushi extends Minigame {
         // this.uiScene = this.scene.get('uiScene');
         this.uiScene.setInstructions('Spread Rice!');
 
-        this.arrow = this.add.sprite(gameCenterX, gameCenterY*2, 'arrowUp').setAlpha(0).setScale(.1);
+        this.arrow = this.add.sprite(gameCenterX, gameCenterY*1.9, 'arrowUp').setAlpha(0).setScale(1.5);
         this.arrow.y -= this.arrow.height;
 
         //this.jelly.x -= this.jelly.width;
@@ -108,6 +108,7 @@ class minigameRollSushi extends Minigame {
                 this.nori.setPosition(gameCenterX,gameCenterY);
                 this.nori.height -= this.rice.height;
                 this.rice.destroy();
+                this.finish(true);
             }
         })
 
