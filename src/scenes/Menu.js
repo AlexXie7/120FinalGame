@@ -48,8 +48,8 @@ class Menu extends Phaser.Scene {
             this.logo.spinSpeed += 10;
         });
 
-        this.credits = this.add.image(gameCenterX, gameCenterY, 'credits').setOrigin(.5).setVisible(false).setDepth(1);
-        this.exitButton = this.add.sprite(this.credits.getTopRight().x, this.credits.getTopRight().y, 'exitButton').setOrigin(.5).setDepth(1).setVisible(false);
+        this.credits = this.add.image(gameCenterX, gameCenterY, 'credits').setOrigin(.5).setVisible(false).setDepth(1).setDisplaySize(game.config.width, game.config.height);
+        this.exitButton = this.add.sprite(this.credits.getTopRight().x, this.credits.getTopRight().y, 'exitButton').setOrigin(1,0).setDepth(1).setVisible(false);
 
         // buttons
         this.playButton = this.add.sprite(gameCenterX, this.title.y + 400, 'playButton', 0).setOrigin(.5);
